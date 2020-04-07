@@ -1,5 +1,6 @@
 package lee.joohan.whattoeattelegrambot.service;
 
+import java.util.List;
 import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.domain.CorporateCard;
 import lee.joohan.whattoeattelegrambot.exception.NotBorrowedAnyCardException;
@@ -35,6 +36,7 @@ public class CorporateCardService {
         .orElseThrow(() -> new NotFoundCorporateCardException(cardNumber));
 
     corporateCard.putBack(userId);
+    corporateCardRepository.save(corporateCard);
   }
 
   @Transactional
@@ -43,5 +45,13 @@ public class CorporateCardService {
         .orElseThrow(() -> new NotBorrowedAnyCardException(userId.toString()));
 
     corporateCard.putBack(userId);
+    corporateCardRepository.save(corporateCard);
+  }
+
+  @Transactional(readOnly = true)
+  public List<CorporateCard> listCardStatuses() {
+
+
+    return corporateCardRepository.findAll();
   }
 }

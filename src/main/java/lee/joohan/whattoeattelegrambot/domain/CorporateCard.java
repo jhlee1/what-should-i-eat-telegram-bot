@@ -1,8 +1,11 @@
 package lee.joohan.whattoeattelegrambot.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -15,6 +18,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Document("corporate_card")
+@ToString
 public class CorporateCard {
   @Id
   ObjectId id;
@@ -23,7 +27,7 @@ public class CorporateCard {
   private ObjectId currentUserId;
   private boolean isBorrowed;
 
-  List<CorporateCardUsageLog> usageLogs;
+  private List<CorporateCardUsageLog> usageLogs;
 
   @CreatedDate
   private LocalDateTime createdAt;
@@ -33,6 +37,7 @@ public class CorporateCard {
 
   public CorporateCard(int cardNum) {
     this.cardNum = cardNum;
+    this.usageLogs = new ArrayList<>();
   }
 
   public void use(ObjectId userId) {
@@ -57,5 +62,22 @@ public class CorporateCard {
         .build();
 
     usageLogs.add(corporateCardUsageLog);
+  }
+
+  @ToString
+  @Getter
+  public static class CorporateCardUsageLog {
+    private ObjectId userId;
+    private CardAction cardAction;
+
+    @CreatedDate // 따로 document를 생성하지 않아서 그런건지 안먹히넹...
+    private LocalDateTime createdAt;
+
+    @Builder
+    public CorporateCardUsageLog(ObjectId userId, CardAction cardAction) {
+      this.userId = userId;
+      this.cardAction = cardAction;
+      this.createdAt = LocalDateTime.now();
+    }
   }
 }

@@ -1,7 +1,9 @@
 package lee.joohan.whattoeattelegrambot.facade;
 
+import java.util.List;
 import java.util.regex.Pattern;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
+import lee.joohan.whattoeattelegrambot.domain.CorporateCard;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
@@ -39,24 +41,29 @@ public class CorporateCardBotCommandFacade {
 
   public String putBackCard(Message message) {
     if (Pattern.matches("/\\S+", message.getText())) {
-//TODO: UserId로 찾기 추가
-      //      corporateCardService.putBack();
+      User user = userService.get(message.getFrom().getId());
+
+      corporateCardService.putBack(user.getId());
+    } else {
+      if (!Pattern.matches("/\\S+ \\d+", message.getText())) {
+        return ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
+      }
+
+      int cardNum = Integer.parseInt(message.getText().split(" ")[1]);
+
+      User user = userService.getOrRegister(
+          message.getFrom().getId(),
+          message.getFrom().getLastName(),
+          message.getFrom().getFirstName()
+      );
+
+      corporateCardService.putBack(cardNum, user.getId());
     }
 
-    if (!Pattern.matches("/\\S+ \\d+", message.getText())) {
-      return ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
-    }
+    return ResponseMessage.RETURN_CORPORATE_CARD;
+  }
 
-    int cardNum = Integer.parseInt(message.getText().split(" ")[1]);
-
-    User user = userService.getOrRegister(
-        message.getFrom().getId(),
-        message.getFrom().getLastName(),
-        message.getFrom().getFirstName()
-    );
-
-    corporateCardService.putBack(cardNum, user.getId());
-
-    return ResponseMessage.USE_CORPORATE_CARD;
+  public String listCards() {
+    return corporateCardService.listCardStatuses().toString();
   }
 }
