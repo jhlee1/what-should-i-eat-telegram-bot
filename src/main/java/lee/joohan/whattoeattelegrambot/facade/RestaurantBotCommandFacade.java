@@ -1,6 +1,7 @@
 package lee.joohan.whattoeattelegrambot.facade;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -91,6 +92,7 @@ public class RestaurantBotCommandFacade {
   public String listRestaurant() {
     return restaurantService.getAll().stream()
         .map(Restaurant::getName)
+        .sorted()
         .collect(Collectors.joining(",\n"));
   }
 
