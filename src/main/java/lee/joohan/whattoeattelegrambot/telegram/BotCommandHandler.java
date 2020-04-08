@@ -42,7 +42,7 @@ public class BotCommandHandler {
       case BotCommand.RANDOM_PICK:
         if (message.getChat().getId() == -310678804) {
 //          개발방만 메뉴 바꾸기
-//          return "탕수육";
+          return "사계솔";
         }
         return restaurantBotCommandFacade.randomPickRestaurant(message);
       case BotCommand.LIST_COMMANDS:

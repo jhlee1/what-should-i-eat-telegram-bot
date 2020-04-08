@@ -2,9 +2,11 @@ package lee.joohan.whattoeattelegrambot.facade;
 
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.domain.CorporateCard;
 import lee.joohan.whattoeattelegrambot.domain.User;
+import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +66,8 @@ public class CorporateCardBotCommandFacade {
   }
 
   public String listCards() {
-    return corporateCardService.listCardStatuses().toString();
+    return corporateCardService.listCardStatuses().stream()
+        .map(cardStatus -> String.format("카드 번호: %s, 사용자: %s, 반납여부: %s", cardStatus.getCardNum(), cardStatus.getUserInfo().getFullName(), !cardStatus.isBorrowed()))
+        .collect(Collectors.joining("\n"));
   }
 }

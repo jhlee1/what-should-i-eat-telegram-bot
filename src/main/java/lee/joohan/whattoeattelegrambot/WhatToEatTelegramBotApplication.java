@@ -8,9 +8,12 @@ import org.telegram.telegrambots.ApiContextInitializer;
 @EnableMongoAuditing
 @SpringBootApplication
 public class WhatToEatTelegramBotApplication {
+  static {
+    ApiContextInitializer.init();
+  }
 
   public static void main(String[] args) {
-    ApiContextInitializer.init();
+
     SpringApplication.run(WhatToEatTelegramBotApplication.class, args);
   }
 

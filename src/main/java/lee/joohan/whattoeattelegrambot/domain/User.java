@@ -26,4 +26,8 @@ public class User {
     this.lastName = lastName;
     this.firstName = firstName;
   }
+
+  public String getFullName() {
+    return lastName + firstName;
+  }
 }

@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.exception;
+package lee.joohan.whattoeattelegrambot.exception.corporate_card;
 
 /**
  * Created by Joohan Lee on 2020/04/07

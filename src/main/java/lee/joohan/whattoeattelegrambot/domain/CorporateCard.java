@@ -3,6 +3,8 @@ package lee.joohan.whattoeattelegrambot.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyInUseException;
+import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyReturnedException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -41,6 +43,10 @@ public class CorporateCard {
   }
 
   public void use(ObjectId userId) {
+    if (isBorrowed) {
+      throw new CorporateCardAlreadyInUseException(cardNum);
+    }
+
     isBorrowed = true;
     currentUserId = userId;
 
@@ -53,6 +59,10 @@ public class CorporateCard {
   }
 
   public void putBack(ObjectId userId) {
+    if (!isBorrowed) {
+      throw new CorporateCardAlreadyReturnedException(cardNum);
+    }
+
     isBorrowed = false;
     currentUserId = userId;
 
