@@ -49,7 +49,7 @@ public class CorporateCardService {
 
     corporateCards.forEach(card -> card.putBack(userId));
 
-    corporateCardRepository.insert(corporateCards);
+    corporateCardRepository.saveAll(corporateCards);
   }
 
   @Transactional(readOnly = true)
