@@ -1,5 +1,20 @@
 package lee.joohan.whattoeattelegrambot.telegram;
 
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_CAFE;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELETE_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.EAT_OR_NOT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.EDIT_NAME_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_COMMANDS;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.NOT_EAT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.RANDOM_PICK;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.RETURN_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.USE_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
+
+import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.common.BotCommand;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.config.HandleException;
@@ -28,35 +43,40 @@ public class BotCommandHandler {
   @HandleException
   public String handle(Message message) {
     log.info("Received message: {}", message);
-    String command = message.getText().split(" ")[0];
+    String command = Optional.ofNullable(message.getText())
+        .map(it -> it.split(" ")[0])
+        .orElse("");
 
     switch (command) {
-      case BotCommand.ADD_RESTAURANT:
+      case ADD_RESTAURANT:
         return restaurantBotCommandFacade.addRestaurant(message);
-      case BotCommand.EDIT_NAME_RESTAURANT:
+      case EDIT_NAME_RESTAURANT:
         return restaurantBotCommandFacade.changeRestaurantName(message);
-      case BotCommand.DELETE_RESTAURANT:
+      case DELETE_RESTAURANT:
           return restaurantBotCommandFacade.deleteRestaurant(message);
-      case BotCommand.LIST_RESTAURANT:
+      case LIST_RESTAURANT:
         return restaurantBotCommandFacade.listRestaurant();
-      case BotCommand.RANDOM_PICK:
-        if (message.getChat().getId() == -310678804) {
-//          개발방만 메뉴 바꾸기
-          return "사계솔";
-        }
+      case RANDOM_PICK:
+//        if (message.getChat().getId() == -310678804) {
+//            return "삼식이";
+//        }
         return restaurantBotCommandFacade.randomPickRestaurant(message);
-      case BotCommand.LIST_COMMANDS:
+      case LIST_COMMANDS:
           return restaurantBotCommandFacade.listCommands();
-      case BotCommand.NOT_EAT:
-        return "먹지마!";
-      case BotCommand.ADD_CAFE:
+      case NOT_EAT:
+        return DO_NOT_EAT;
+      case ADD_CAFE:
         return cafeBotCommandFacade.addCafe(message);
-      case BotCommand.USE_CORPORATE_CREDIT_CARD:
+      case USE_CORPORATE_CREDIT_CARD:
         return corporateCardBotCommandFacade.useCard(message);
-      case BotCommand.RETURN_CORPORATE_CREDIT_CARD:
+      case RETURN_CORPORATE_CREDIT_CARD:
         return corporateCardBotCommandFacade.putBackCard(message);
-      case BotCommand.LIST_CORPORATE_CREDIT_CARD:
+      case LIST_CORPORATE_CREDIT_CARD:
         return corporateCardBotCommandFacade.listCards();
+      case EAT_OR_NOT:
+        return restaurantBotCommandFacade.eatOrNot(message);
+      case BotCommand.EMPTY:
+        return null;
       default:
         return ResponseMessage.NO_COMMAND_FOUND_ERROR_RESPONSE;
     }

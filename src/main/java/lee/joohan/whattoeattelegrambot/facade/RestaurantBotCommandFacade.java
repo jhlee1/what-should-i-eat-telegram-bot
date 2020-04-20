@@ -1,7 +1,9 @@
 package lee.joohan.whattoeattelegrambot.facade;
 
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.EAT;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -140,5 +142,17 @@ public class RestaurantBotCommandFacade {
         })
         .map(String::valueOf)
         .collect(Collectors.joining("\n"));
+  }
+
+  public String eatOrNot(Message message) {
+    if (!Pattern.matches("/\\S+ \\S+", message.getText())) {
+      return ResponseMessage.EAT_OR_NOT_ARGS_ERROR_RESPONSE;
+    }
+
+    if (Math.random() > 0.5) {
+      return EAT;
+    } else {
+      return DO_NOT_EAT;
+    }
   }
 }
