@@ -37,7 +37,6 @@ public class BotCommandHandler {
   private final CorporateCardBotCommandFacade corporateCardBotCommandFacade;
 
 
-  //TODO: 일단은 block으로 처리했지만 Return타입 Mono로 바꾸기
   @HandleException
   public Mono<String> handle(Message message) {
     log.info("Received message: {}", message);
