@@ -29,9 +29,10 @@ public class WhatShouldIEatBot extends TelegramLongPollingBot {
 
   @Override
   public void onUpdateReceived(Update update) {
-    String message = botCommandHandler.handle(update.getMessage());
 
-    reply(update.getMessage().getChatId(), message);
+    botCommandHandler.handle(update.getMessage())
+        .doOnNext(s -> reply(update.getMessage().getChatId(), s))
+        .subscribe();
   }
 
   @Override

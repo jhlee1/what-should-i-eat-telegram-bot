@@ -4,11 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.domain.CorporateCard;
 import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
-import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotFoundCorporateCardException;
 import lee.joohan.whattoeattelegrambot.repository.CorporateCardRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,16 +39,16 @@ public class CorporateCardService {
     corporateCardRepository.save(corporateCard);
   }
 
-  @Transactional
-  public void putBack(ObjectId userId) {
-    List<CorporateCard> corporateCards = Optional.ofNullable(corporateCardRepository.findByCurrentUserId(userId))
-        .filter(CollectionUtils::isNotEmpty)
-        .orElseThrow(() -> new NotBorrowedAnyCardException(userId.toString()));
-
-    corporateCards.forEach(card -> card.putBack(userId));
-
-    corporateCardRepository.saveAll(corporateCards);
-  }
+//  @Transactional
+//  public  putBack(Mono<ObjectId> userId) {
+//    List<CorporateCard> corporateCards = Optional.ofNullable(corporateCardRepository.findByCurrentUserId(userId))
+//        .filter(CollectionUtils::isNotEmpty)
+//        .orElseThrow(() -> new NotBorrowedAnyCardException(userId.toString()));
+//
+//    corporateCards.forEach(card -> card.putBack(userId));
+//
+//    corporateCardRepository.saveAll(corporateCards);
+//  }
 
   @Transactional(readOnly = true)
   public List<CorporateCardStatus> listCardStatuses() {
