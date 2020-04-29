@@ -26,6 +26,7 @@ public class ResponseMessage {
   public static final String CHANGE_RESTAURANT_NAME_ARGS_ERROR_RESPONSE = "식당 이름 변경 실패. 입력 형식을 확인하세요. (ex. /맛집이름변경 현재_이름 변경할_이름)";
   public static final String REGISTER_MENU_ARGS_ERROR_RESPONSE = "메뉴등록 실패. 입력 형식을 확인하세요. (ex. /메뉴추가 맛집이름 메뉴 (가격))";
   public static final String EAT_OR_NOT_ARGS_ERROR_RESPONSE = "메뉴를 입력하세요. (ex. /먹을까 탕수육)";
+  public static final String RANDOM_PICK_ARGS_ERROR_RESPONSE = "뭐먹 잘못된 입력. (ex. /뭐먹 || /뭐먹 2)";
 
 
   public static final String REGISTER_CAFE_ARGS_ERROR_RESPONSE = "카페등록 실패. 입력 형식을 확인하세요. (ex. /카페추가 이름)";

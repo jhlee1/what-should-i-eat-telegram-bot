@@ -2,6 +2,7 @@ package lee.joohan.whattoeattelegrambot.facade;
 
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.EAT;
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.RANDOM_PICK_ARGS_ERROR_RESPONSE;
 
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -93,7 +94,7 @@ public class RestaurantBotCommandFacade {
                         .map(Restaurant::getName)
                         .collect(Collectors.joining(",\n"))
                 )
-        );
+        ).onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
   }
 
   public Mono<String> listRestaurant() {
