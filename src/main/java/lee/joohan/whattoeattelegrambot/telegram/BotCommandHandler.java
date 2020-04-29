@@ -54,9 +54,9 @@ public class BotCommandHandler {
       case LIST_RESTAURANT:
         return restaurantBotCommandFacade.listRestaurant();
       case RANDOM_PICK:
-        if (message.getChat().getId() == -310678804) {
-            return Mono.just("삼식이");
-        }
+//        if (message.getChat().getId() == -310678804) {
+//            return Mono.just("삼식이");
+//        }
         return restaurantBotCommandFacade.randomPickRestaurant(Mono.just(message));
       case LIST_COMMANDS:
         return restaurantBotCommandFacade.listCommands();

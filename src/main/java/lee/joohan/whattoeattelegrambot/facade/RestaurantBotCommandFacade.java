@@ -91,7 +91,8 @@ public class RestaurantBotCommandFacade {
                     random.ints(num, 0, restaurants.size())
                         .mapToObj(restaurants::get)
                         .map(Restaurant::getName)
-                        .collect(Collectors.joining(",\n")))
+                        .collect(Collectors.joining(",\n"))
+                )
         );
   }
 
