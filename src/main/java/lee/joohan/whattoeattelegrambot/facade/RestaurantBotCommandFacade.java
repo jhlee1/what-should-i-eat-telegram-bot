@@ -94,7 +94,9 @@ public class RestaurantBotCommandFacade {
                         .map(Restaurant::getName)
                         .collect(Collectors.joining(",\n"))
                 )
-        ).onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
+        )
+        .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
+        .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
   }
 
   public Mono<String> listRestaurant() {
