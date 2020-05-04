@@ -1,15 +1,16 @@
 package lee.joohan.whattoeattelegrambot.service;
 
-import java.util.List;
-import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.domain.CorporateCard;
 import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
-import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotFoundCorporateCardException;
+import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
 import lee.joohan.whattoeattelegrambot.repository.CorporateCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  * Created by Joohan Lee on 2020/04/07
@@ -21,22 +22,40 @@ public class CorporateCardService {
   private final CorporateCardRepository corporateCardRepository;
 
   @Transactional
-  public void use(int cardNumber, ObjectId userId) {
-    CorporateCard corporateCard = Optional.ofNullable(corporateCardRepository.findByCardNum(cardNumber))
-        .orElseGet(() -> new CorporateCard(cardNumber));
+  public Mono<CorporateCard> use(Mono<Tuple2<Integer, ObjectId>> cardNumberUserIdMono) {
+    return corporateCardRepository.findByCardNum(cardNumberUserIdMono.map(Tuple2::getT1))
+        .switchIfEmpty(cardNumberUserIdMono
+            .map(Tuple2::getT1)
+            .map(CorporateCard::new)
+        ).flatMap(card ->
+            cardNumberUserIdMono.map(mono -> {
+                  card.use(mono.getT2());
 
-    corporateCard.use(userId);
-
-    corporateCardRepository.save(corporateCard);
+                  return card;
+                }
+            )
+        )
+        .flatMap(corporateCardRepository::save);
   }
 
   @Transactional
-  public void putBack(int cardNumber, ObjectId userId) {
-    CorporateCard corporateCard = Optional.ofNullable(corporateCardRepository.findByCardNum(cardNumber))
-        .orElseThrow(() -> new NotFoundCorporateCardException(cardNumber));
-
-    corporateCard.putBack(userId);
-    corporateCardRepository.save(corporateCard);
+  public void putBack(Mono<Tuple2<Integer, ObjectId>> cardNumberUserIdMono) {
+    cardNumberUserIdMono.zipWith(
+        cardNumberUserIdMono
+            .flatMap(cardNumberUserId ->
+                corporateCardRepository.findByCardNum(cardNumberUserIdMono.map(Tuple2::getT1))
+            )
+            .switchIfEmpty(Mono.error(() ->
+                new NotBorrowedAnyCardException(cardNumberUserIdMono.block().getT2().toString()))
+            )
+    ).map(cardTuple -> {
+      cardTuple.getT2()
+          .putBack(
+              cardTuple
+                  .getT1()
+                  .getT2());
+      return corporateCardRepository.save(cardTuple.getT2());
+    });
   }
 
 //  @Transactional
@@ -51,7 +70,7 @@ public class CorporateCardService {
 //  }
 
   @Transactional(readOnly = true)
-  public List<CorporateCardStatus> listCardStatuses() {
+  public Flux<CorporateCardStatus> listCardStatuses() {
     return corporateCardRepository.findCardStatuses();
   }
 }

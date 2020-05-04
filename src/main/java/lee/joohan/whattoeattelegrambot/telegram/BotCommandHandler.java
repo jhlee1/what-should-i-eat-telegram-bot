@@ -6,9 +6,12 @@ import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELETE_RESTAURAN
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.EAT_OR_NOT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.EDIT_NAME_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_COMMANDS;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RANDOM_PICK;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.RETURN_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.USE_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 
 import java.util.Optional;
@@ -54,9 +57,9 @@ public class BotCommandHandler {
       case LIST_RESTAURANT:
         return restaurantBotCommandFacade.listRestaurant();
       case RANDOM_PICK:
-//        if (message.getChat().getId() == -310678804) {
-//            return Mono.just("삼식이");
-//        }
+        if (message.getChat().getId() == -310678804) {
+            return Mono.just("탕수육");
+        }
         return restaurantBotCommandFacade.randomPickRestaurant(Mono.just(message));
       case LIST_COMMANDS:
         return restaurantBotCommandFacade.listCommands();
@@ -64,12 +67,12 @@ public class BotCommandHandler {
         return Mono.just(DO_NOT_EAT);
       case ADD_CAFE:
         return cafeBotCommandFacade.addCafe(Mono.just(message));
-//      case USE_CORPORATE_CREDIT_CARD:
-//        return corporateCardBotCommandFacade.useCard(message);
-//      case RETURN_CORPORATE_CREDIT_CARD:
-//        return corporateCardBotCommandFacade.putBackCard(message);
-//      case LIST_CORPORATE_CREDIT_CARD:
-//        return corporateCardBotCommandFacade.listCards();
+      case USE_CORPORATE_CREDIT_CARD:
+        return corporateCardBotCommandFacade.useCard(Mono.just(message));
+      case RETURN_CORPORATE_CREDIT_CARD:
+        return corporateCardBotCommandFacade.putBackCard(Mono.just(message));
+      case LIST_CORPORATE_CREDIT_CARD:
+        return corporateCardBotCommandFacade.listCards();
       case EAT_OR_NOT:
         return restaurantBotCommandFacade.eatOrNot(Mono.just(message));
       case BotCommand.EMPTY:
