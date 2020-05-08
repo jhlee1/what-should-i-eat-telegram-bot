@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.facade;
+package lee.joohan.whattoeattelegrambot.handler;
 
 import java.util.regex.Pattern;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class CafeBotCommandFacade {
+public class CafeBotCommandHandler {
   private final UserService userService;
   private final CafeService cafeService;
 

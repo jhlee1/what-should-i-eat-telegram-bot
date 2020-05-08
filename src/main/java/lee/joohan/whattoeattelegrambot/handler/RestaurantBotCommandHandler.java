@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.facade;
+package lee.joohan.whattoeattelegrambot.handler;
 
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.EAT;
@@ -29,7 +29,7 @@ import reactor.util.function.Tuples;
 @RequiredArgsConstructor
 @Component
 @Slf4j
-public class RestaurantBotCommandFacade {
+public class RestaurantBotCommandHandler {
   private final RestaurantService restaurantService;
   private final UserService userService;
   private final static Random random = new Random();
@@ -100,11 +100,10 @@ public class RestaurantBotCommandFacade {
   }
 
   public Mono<String> listRestaurant() {
-    return Mono.just(restaurantService.getAll()
+    return restaurantService.getAll()
         .map(Restaurant::getName)
         .sort()
-        .toStream()
-        .collect(Collectors.joining(",\n")));
+        .collect(Collectors.joining(",\n"));
   }
 
   public Mono<String> changeRestaurantName(Mono<Message> messageMono) {

@@ -5,6 +5,7 @@ import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
 import lee.joohan.whattoeattelegrambot.repository.CorporateCardRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import reactor.util.function.Tuple2;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CorporateCardService {
   private final CorporateCardRepository corporateCardRepository;
 
@@ -39,8 +41,8 @@ public class CorporateCardService {
   }
 
   @Transactional
-  public void putBack(Mono<Tuple2<Integer, ObjectId>> cardNumberUserIdMono) {
-    cardNumberUserIdMono.zipWith(
+  public Mono<CorporateCard> putBack(Mono<Tuple2<Integer, ObjectId>> cardNumberUserIdMono) {
+    return cardNumberUserIdMono.zipWith(
         cardNumberUserIdMono
             .flatMap(cardNumberUserId ->
                 corporateCardRepository.findByCardNum(cardNumberUserIdMono.map(Tuple2::getT1))
@@ -48,26 +50,27 @@ public class CorporateCardService {
             .switchIfEmpty(Mono.error(() ->
                 new NotBorrowedAnyCardException(cardNumberUserIdMono.block().getT2().toString()))
             )
-    ).map(cardTuple -> {
+    ).flatMap(cardTuple -> {
       cardTuple.getT2()
-          .putBack(
-              cardTuple
-                  .getT1()
-                  .getT2());
+          .putBack(cardTuple.getT1().getT2());
+
       return corporateCardRepository.save(cardTuple.getT2());
     });
   }
 
-//  @Transactional
-//  public  putBack(Mono<ObjectId> userId) {
-//    List<CorporateCard> corporateCards = Optional.ofNullable(corporateCardRepository.findByCurrentUserId(userId))
-//        .filter(CollectionUtils::isNotEmpty)
-//        .orElseThrow(() -> new NotBorrowedAnyCardException(userId.toString()));
-//
-//    corporateCards.forEach(card -> card.putBack(userId));
-//
-//    corporateCardRepository.saveAll(corporateCards);
-//  }
+  @Transactional
+  public Flux<CorporateCard> putBackOwnCard(Mono<ObjectId> userId) {
+    Flux<CorporateCard> corporateCardFlux = userId
+        .flatMapMany(id -> corporateCardRepository.findByIsBorrowedIsTrueAndCurrentUserId(Mono.just(id)))
+        .switchIfEmpty(Mono.error(() -> new NotBorrowedAnyCardException(userId.map(ObjectId::toString).block())))
+        .flatMap(corporateCard -> {
+          corporateCard.putBack(corporateCard.getCurrentUserId());
+
+          return corporateCardRepository.save(corporateCard);
+        });
+
+    return corporateCardRepository.saveAll(corporateCardFlux);
+  }
 
   @Transactional(readOnly = true)
   public Flux<CorporateCardStatus> listCardStatuses() {

@@ -18,9 +18,9 @@ import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.common.BotCommand;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.config.HandleException;
-import lee.joohan.whattoeattelegrambot.facade.CafeBotCommandFacade;
-import lee.joohan.whattoeattelegrambot.facade.CorporateCardBotCommandFacade;
-import lee.joohan.whattoeattelegrambot.facade.RestaurantBotCommandFacade;
+import lee.joohan.whattoeattelegrambot.handler.CafeBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.CorporateCardBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.RestaurantBotCommandHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -34,10 +34,10 @@ import reactor.core.publisher.Mono;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class BotCommandHandler {
-  private final RestaurantBotCommandFacade restaurantBotCommandFacade;
-  private final CafeBotCommandFacade cafeBotCommandFacade;
-  private final CorporateCardBotCommandFacade corporateCardBotCommandFacade;
+public class BotCommandRouter {
+  private final RestaurantBotCommandHandler restaurantBotCommandHandler;
+  private final CafeBotCommandHandler cafeBotCommandHandler;
+  private final CorporateCardBotCommandHandler corporateCardBotCommandHandler;
 
 
   @HandleException
@@ -49,32 +49,32 @@ public class BotCommandHandler {
 
     switch (command) {
       case ADD_RESTAURANT:
-        return restaurantBotCommandFacade.addRestaurant(Mono.just(message));
+        return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
       case EDIT_NAME_RESTAURANT:
-        return restaurantBotCommandFacade.changeRestaurantName(Mono.just(message));
+        return restaurantBotCommandHandler.changeRestaurantName(Mono.fromSupplier(() -> message));
       case DELETE_RESTAURANT:
-        return restaurantBotCommandFacade.deleteRestaurant(Mono.just(message));
+        return restaurantBotCommandHandler.deleteRestaurant(Mono.fromSupplier(() -> message));
       case LIST_RESTAURANT:
-        return restaurantBotCommandFacade.listRestaurant();
+        return restaurantBotCommandHandler.listRestaurant();
       case RANDOM_PICK:
-        if (message.getChat().getId() == -310678804) {
-            return Mono.just("탕수육");
-        }
-        return restaurantBotCommandFacade.randomPickRestaurant(Mono.just(message));
+//        if (message.getChat().getId() == -310678804) {
+//            return Mono.just("탕수육");
+//        }
+        return restaurantBotCommandHandler.randomPickRestaurant(Mono.fromSupplier(() -> message));
       case LIST_COMMANDS:
-        return restaurantBotCommandFacade.listCommands();
+        return restaurantBotCommandHandler.listCommands();
       case NOT_EAT:
         return Mono.just(DO_NOT_EAT);
       case ADD_CAFE:
-        return cafeBotCommandFacade.addCafe(Mono.just(message));
+        return cafeBotCommandHandler.addCafe(Mono.just(message));
       case USE_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandFacade.useCard(Mono.just(message));
+        return corporateCardBotCommandHandler.useCard(Mono.just(message));
       case RETURN_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandFacade.putBackCard(Mono.just(message));
+        return corporateCardBotCommandHandler.putBackCard(Mono.just(message));
       case LIST_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandFacade.listCards();
+        return corporateCardBotCommandHandler.listCards();
       case EAT_OR_NOT:
-        return restaurantBotCommandFacade.eatOrNot(Mono.just(message));
+        return restaurantBotCommandHandler.eatOrNot(Mono.just(message));
       case BotCommand.EMPTY:
         return null;
       default:

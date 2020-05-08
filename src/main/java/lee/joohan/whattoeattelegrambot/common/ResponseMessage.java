@@ -33,6 +33,7 @@ public class ResponseMessage {
 
   public static final String USE_CORPORATE_CARD_ARGS_ERROR_RESPONSE = "카드 사용 등록 실패. 입력 형식을 확인하세요. (ex. /카드사용 번호)";
   public static final String CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE = "이미 사용중인 카드입니다.";
+  public static final String CORPORATE_CARD_ALREADY_IN_RETURNED_ERROR_RESPONSE = "대여 중인 카드가 아닙니다.";
   public static final String PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE = "카드 반납 실패. 입력 형식을 확인하세요. (ex. /카드반납 번호)";
   public static final String PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE = "카드 반납 실패. 입력 형식을 확인하세요. (ex. /카드반납 번호)";
 

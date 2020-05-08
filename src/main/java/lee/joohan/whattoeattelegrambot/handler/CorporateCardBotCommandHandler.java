@@ -1,7 +1,8 @@
-package lee.joohan.whattoeattelegrambot.facade;
+package lee.joohan.whattoeattelegrambot.handler;
 
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.RETURN_CORPORATE_CARD;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.USE_CORPORATE_CARD;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.USE_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
@@ -10,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyInUseException;
+import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class CorporateCardBotCommandFacade {
+public class CorporateCardBotCommandHandler {
   private final CorporateCardService corporateCardService;
   private final UserService userService;
 
@@ -49,8 +51,23 @@ public class CorporateCardBotCommandFacade {
 
   public Mono<String> putBackCard(Mono<Message> messageMono) {
     return messageMono
-        .filter(message -> Pattern.matches("/\\S+", message.getText()))
-        .switchIfEmpty(Mono.error(IllegalArgumentException::new))
+        .filter(message -> Pattern.matches("/\\S+ \\d+", message.getText()))
+        .switchIfEmpty(
+            messageMono
+                .filter(message -> Pattern.matches("/\\S+", message.getText()))
+                .switchIfEmpty(Mono.error(IllegalArgumentException::new))
+                .map(message -> userService.getOrRegister(
+                    Mono.just(
+                        User.builder()
+                            .telegramId(message.getFrom().getId())
+                            .firstName(message.getFrom().getFirstName())
+                            .lastName(message.getFrom().getLastName())
+                            .build()
+                    )
+                ))
+                .flatMapMany(user -> corporateCardService.putBackOwnCard(user.map(User::getId)))
+                .then(Mono.empty())
+        )
         .map(message -> Integer.parseInt(message.getText().split(" ")[1]))
         .zipWith(
             messageMono.map(message -> User.builder()
@@ -61,36 +78,10 @@ public class CorporateCardBotCommandFacade {
             ).flatMap(user -> userService.getOrRegister(Mono.just(user)))
                 .map(User::getId)
         )
-        .doOnNext(tuple -> corporateCardService.putBack(Mono.just(tuple)))
+        .flatMap(tuple -> corporateCardService.putBack(Mono.just(tuple)))
         .then(Mono.just(RETURN_CORPORATE_CARD))
-        .onErrorReturn(PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE);
-
-
-
-//    if (Pattern.matches("/\\S+", message.getText())) {
-//      Mono<User> user = userService.get(Mono.just(message.getFrom().getId().longValue()))
-//          .map(userMono -> userMono.getId())
-//          .flatMap(objectId -> corporateCardService.putBack(objectId))
-//          ;
-//
-//      corporateCardService.putBack(user.getId());
-//    } else {
-//      if (!Pattern.matches("/\\S+ \\d+", message.getText())) {
-//        return ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
-//      }
-//
-//      int cardNum = Integer.parseInt(message.getText().split(" ")[1]);
-//
-//      User user = userService.getOrRegister(
-//          message.getFrom().getId(),
-//          message.getFrom().getLastName(),
-//          message.getFrom().getFirstName()
-//      );
-//
-//      corporateCardService.putBack(cardNum, user.getId());
-//    }
-//
-//    return ResponseMessage.RETURN_CORPORATE_CARD;
+        .onErrorReturn(IllegalArgumentException.class, PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE)
+        .onErrorReturn(NotBorrowedAnyCardException.class, PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE);
   }
 
   public Mono<String> listCards() {
