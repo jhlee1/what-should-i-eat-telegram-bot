@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.handler;
+package lee.joohan.whattoeattelegrambot.handler.bot;
 
 import java.util.regex.Pattern;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;

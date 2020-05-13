@@ -2,10 +2,12 @@ package lee.joohan.whattoeattelegrambot.service;
 
 import lee.joohan.whattoeattelegrambot.domain.Restaurant;
 import lee.joohan.whattoeattelegrambot.domain.User;
+import lee.joohan.whattoeattelegrambot.dto.RegisterRestaurantRequest;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyExistRestaurantException;
 import lee.joohan.whattoeattelegrambot.exception.NotFoundRestaurantException;
 import lee.joohan.whattoeattelegrambot.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -21,19 +23,30 @@ import reactor.util.function.Tuple2;
 public class RestaurantService {
   private final RestaurantRepository restaurantRepository;
 
-  public Mono<Restaurant> register(Mono<Tuple2<User,String>> userRestaurantNameMono) {
-    return restaurantRepository.findByName(userRestaurantNameMono.map(Tuple2::getT2))
+  public Mono<Restaurant> registerFromTelegram(Mono<Tuple2<ObjectId,String>> userIdRestaurantNameMono) {
+    return restaurantRepository.findByName(userIdRestaurantNameMono.map(Tuple2::getT2))
         .<Restaurant>flatMap(restaurant -> Mono.error(AlreadyExistRestaurantException.fromName(restaurant.getName())))
-        .switchIfEmpty(userRestaurantNameMono.flatMap(it ->
+        .switchIfEmpty(userIdRestaurantNameMono.flatMap(it ->
                 restaurantRepository.save(
                     Restaurant.builder()
                         .name(it.getT2())
-                        .creatorId(it.getT1().getId())
+                        .creatorId(it.getT1())
                         .build()
                 )
             )
         );
   }
+
+  public Mono<Restaurant> registerFromRequest(Mono<Tuple2<ObjectId, RegisterRestaurantRequest>> userIdRestaurantRequestMono) {
+    return restaurantRepository.findByName(userIdRestaurantRequestMono.map(Tuple2::getT2).map(RegisterRestaurantRequest::getName))
+            .switchIfEmpty(userIdRestaurantRequestMono.flatMap(tmp -> restaurantRepository.save(Restaurant.builder()
+            .name(tmp.getT2().getName())
+            .creatorId(tmp.getT1())
+            .address(tmp.getT2().getAddress())
+            .build())))
+        .<Restaurant>flatMap(restaurant -> Mono.error(AlreadyExistRestaurantException.fromName(restaurant.getName())));
+  }
+
 
   @Transactional(readOnly = true)
   public Flux<Restaurant> getAll() {

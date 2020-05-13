@@ -24,7 +24,7 @@ public class Menu {
   private String name;
   private int price;
   private List<Review> reviews;
-  private User creator;
+  private ObjectId creatorId;
 
   @CreatedDate
   private LocalDateTime createdAt;
@@ -32,10 +32,10 @@ public class Menu {
   private LocalDateTime updatedAt;
 
   @Builder
-  public Menu(String name, int price, User creator) {
+  public Menu(String name, int price, ObjectId creatorId) {
     this.name = name;
     this.price = price;
-    this.creator = creator;
+    this.creatorId = creatorId;
 
     reviews = new ArrayList<>();
   }

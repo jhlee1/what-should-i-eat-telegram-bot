@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.handler;
+package lee.joohan.whattoeattelegrambot.handler.bot;
 
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.EAT;
@@ -46,9 +46,10 @@ public class RestaurantBotCommandHandler {
                 .build()
             )
             )
+            .map(User::getId)
         )
         .zipWith(messageMono.map(Message::getText).map(s -> s.split(" ")[1]))
-        .flatMap(objects -> restaurantService.register(Mono.just(objects)))
+        .flatMap(objects -> restaurantService.registerFromTelegram(Mono.just(objects)))
         .then(Mono.just(ResponseMessage.REGISTER_RESTAURANT_RESPONSE))
         .onErrorReturn(ResponseMessage.REGISTER_RESTAURANT_ARGS_ERROR_RESPONSE);
   }

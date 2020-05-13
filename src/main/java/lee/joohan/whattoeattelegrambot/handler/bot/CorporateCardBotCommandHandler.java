@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.handler;
+package lee.joohan.whattoeattelegrambot.handler.bot;
 
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
