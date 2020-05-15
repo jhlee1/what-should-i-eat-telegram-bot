@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.dto;
+package lee.joohan.whattoeattelegrambot.dto.request;
 
 import lombok.Getter;
 import org.bson.types.ObjectId;

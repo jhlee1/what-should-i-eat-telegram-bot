@@ -2,7 +2,7 @@ package lee.joohan.whattoeattelegrambot.service;
 
 import lee.joohan.whattoeattelegrambot.domain.Restaurant;
 import lee.joohan.whattoeattelegrambot.domain.User;
-import lee.joohan.whattoeattelegrambot.dto.RegisterRestaurantRequest;
+import lee.joohan.whattoeattelegrambot.dto.request.RegisterRestaurantRequest;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyExistRestaurantException;
 import lee.joohan.whattoeattelegrambot.exception.NotFoundRestaurantException;
 import lee.joohan.whattoeattelegrambot.repository.RestaurantRepository;

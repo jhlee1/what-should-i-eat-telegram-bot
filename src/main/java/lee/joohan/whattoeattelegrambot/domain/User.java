@@ -28,6 +28,9 @@ public class User {
   }
 
   public String getFullName() {
-    return lastName + firstName;
+    return new StringBuilder()
+        .append(lastName)
+        .append(firstName)
+        .toString();
   }
 }

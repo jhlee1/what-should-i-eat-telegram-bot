@@ -1,7 +1,7 @@
 package lee.joohan.whattoeattelegrambot.handler.rest;
 
 import lee.joohan.whattoeattelegrambot.domain.Restaurant;
-import lee.joohan.whattoeattelegrambot.dto.RegisterRestaurantRequest;
+import lee.joohan.whattoeattelegrambot.dto.request.RegisterRestaurantRequest;
 import lee.joohan.whattoeattelegrambot.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
