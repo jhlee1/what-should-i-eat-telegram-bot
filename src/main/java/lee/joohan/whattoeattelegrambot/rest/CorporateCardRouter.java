@@ -41,6 +41,7 @@ public class CorporateCardRouter {
                     .map(UseCorporateCardResponse::new),
                     UseCorporateCardResponse.class
                 )
+                .doOnError(error -> ServerResponse.badRequest().bodyValue(error.getCause()))
         )
         .PUT("/corporateCards/putBack", request ->
             ServerResponse.ok()

@@ -1,5 +1,6 @@
 package lee.joohan.whattoeattelegrambot.handler.bot;
 
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.CORPORATE_CARD_ALREADY_IN_RETURNED_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE;
@@ -11,6 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyInUseException;
+import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyReturnedException;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
@@ -81,7 +83,8 @@ public class CorporateCardBotCommandHandler {
         .flatMap(tuple -> corporateCardService.putBack(Mono.just(tuple)))
         .then(Mono.just(RETURN_CORPORATE_CARD))
         .onErrorReturn(IllegalArgumentException.class, PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE)
-        .onErrorReturn(NotBorrowedAnyCardException.class, PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE);
+        .onErrorReturn(NotBorrowedAnyCardException.class, PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE)
+        .onErrorReturn(CorporateCardAlreadyReturnedException.class, CORPORATE_CARD_ALREADY_IN_RETURNED_ERROR_RESPONSE);
   }
 
   public Mono<String> listCards() {

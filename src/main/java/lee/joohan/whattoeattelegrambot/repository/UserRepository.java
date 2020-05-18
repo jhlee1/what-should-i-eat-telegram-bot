@@ -1,6 +1,5 @@
 package lee.joohan.whattoeattelegrambot.repository;
 
-import java.util.List;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
@@ -11,5 +10,5 @@ import reactor.core.publisher.Mono;
  */
 public interface UserRepository extends ReactiveMongoRepository<User, ObjectId> {
   Mono<User> findByTelegramId(Mono<Long> telegramId);
-  List<User> findByLastNameAndFirstName(String lastName, String firstName);
+  Mono<User> findByUsername(Mono<String> username);
 }

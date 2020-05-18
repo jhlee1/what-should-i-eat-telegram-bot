@@ -24,8 +24,13 @@ public class UserService {
   @Transactional
   public Mono<User> getOrRegister(Mono<User> userMono) {
 //    return userRepository.findByTelegramId(userMono.);
-    return userRepository.findByTelegramId(userMono
-        .map(User::getTelegramId))
-        .flatMap(user -> userRepository.save(user));
+    return userRepository.findByTelegramId(
+        userMono.map(User::getTelegramId)
+    ).flatMap(user -> userRepository.save(user));
+  }
+
+  @Transactional(readOnly = true)
+  public Mono<User> findByUsername(Mono<String> username) {
+    return userRepository.findByUsername(username);
   }
 }

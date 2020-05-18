@@ -25,23 +25,27 @@ public class CorporateCardRestHandler {
   }
 
   public Mono<CorporateCard> use(Mono<UseCorporateCardRequest> useCorporateCardRequestMono) {
-    return corporateCardService.use(
-        useCorporateCardRequestMono.map(
-            useCorporateCardRequest ->
+    return useCorporateCardRequestMono.flatMap(useCorporateCardRequest ->
+        corporateCardService.use(
+            Mono.just(
                 Tuples.of(
                     useCorporateCardRequest.getCardNum(),
-                    useCorporateCardRequest.getUserId())
+                    useCorporateCardRequest.getUserId()))
         )
     );
+
+//    return useCorporateCardRequestMono.map(useCorporateCardRequest -> new CorporateCard(useCorporateCardRequest.getCardNum()));
   }
 
   public Mono<CorporateCard> putBack(Mono<PutBackCorporateCardRequest> putBackCorporateCardRequestMono) {
-    return corporateCardService.putBack(
-        putBackCorporateCardRequestMono.map(
-            putBackCorporateCardRequest ->
+    return putBackCorporateCardRequestMono.flatMap(putBackCorporateCardRequest ->
+        corporateCardService.putBack(
+            Mono.just(
                 Tuples.of(
                     putBackCorporateCardRequest.getCardNum(),
-                    putBackCorporateCardRequest.getUserId())
+                    putBackCorporateCardRequest.getUserId()
+                )
+            )
         )
     );
   }
