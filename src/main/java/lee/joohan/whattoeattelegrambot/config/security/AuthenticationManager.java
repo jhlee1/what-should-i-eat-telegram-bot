@@ -1,10 +1,11 @@
-package lee.joohan.whattoeattelegrambot.common;
+package lee.joohan.whattoeattelegrambot.config.security;
 
 import static lee.joohan.whattoeattelegrambot.common.AccessTokenKey.AUTHORITY_KEY;
 
 import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,31 +25,27 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
   private final TokenProvider tokenProvider;
 
   @Override
-  @SuppressWarnings("unchecked")
-  public Mono authenticate(Authentication authentication) {
+  public Mono<Authentication> authenticate(Authentication authentication) {
     String authToken = authentication.getCredentials().toString();
-    String username;
+    String email;
     try {
-      username = tokenProvider.getUsernameFromToken(authToken);
+      email = tokenProvider.getEmailFromToken(authToken);
     } catch (Exception e) {
-      username = null;
+      email = null;
     }
-    if (username != null && ! tokenProvider.isTokenExpired(authToken)) {
+    if (email != null && !tokenProvider.isTokenExpired(authToken)) {
       Claims claims = tokenProvider.getAllClaimsFromToken(authToken);
-      List roles = claims.get(AUTHORITY_KEY, List.class)
-      List authorities = roles.stream().map(role -> new SimpleGrantedAuthority(role)).collect(
-          Collectors.toList());
-      UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, username, authorities);
+      List<String> roles = claims.get(AUTHORITY_KEY, List.class);
+      List<SimpleGrantedAuthority> authorities = roles.stream()
+              .map(role -> new SimpleGrantedAuthority(role))
+              .collect(Collectors.toList());
+      UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, email, authorities);
       SecurityContextHolder
-          .getContext().setAuthentication(new AuthenticatedUser(username, authorities));
+          .getContext().setAuthentication(new AuthenticatedUser(email, authorities));
       return Mono.just(auth);
     } else {
       return Mono.empty();
     }
   }
 }
-
-//  https://www.devglan.com/spring-security/spring-security-webflux-jwt
-
-//
 

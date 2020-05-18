@@ -1,4 +1,4 @@
-package lee.joohan.whattoeattelegrambot.common;
+package lee.joohan.whattoeattelegrambot.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -6,6 +6,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.function.Function;
+
+import lee.joohan.whattoeattelegrambot.common.AccessTokenKey;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.domain.UserRole;
 import org.springframework.stereotype.Component;
@@ -19,7 +21,7 @@ public class TokenProvider implements Serializable {
   private static final String SIGNING_KEY = "ajnajrqhtxptmxmwnd"; //TODO: Resource로 옮기기
   private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 3600;
 
-  public String getUsernameFromToken(String token) {
+  public String getEmailFromToken(String token) {
     return getClaimFromToken(token, Claims::getSubject);
   }
 
@@ -46,7 +48,7 @@ public class TokenProvider implements Serializable {
 
   public String generateToken(User user) {
     return Jwts.builder()
-        .setSubject(user.getUsername())
+        .setSubject(user.getEmail())
         .claim(AccessTokenKey.AUTHORITY_KEY, user.getRoles().stream().map(UserRole::name))
         .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
         .setIssuer("anjajrqht")
@@ -54,5 +56,4 @@ public class TokenProvider implements Serializable {
         .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
         .compact();
   }
-
 }

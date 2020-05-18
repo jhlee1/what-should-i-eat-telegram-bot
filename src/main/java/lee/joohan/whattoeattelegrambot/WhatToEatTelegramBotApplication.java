@@ -15,7 +15,6 @@ public class WhatToEatTelegramBotApplication {
   }
 
   public static void main(String[] args) {
-
     SpringApplication.run(WhatToEatTelegramBotApplication.class, args);
   }
 

@@ -1,11 +1,17 @@
 package lee.joohan.whattoeattelegrambot.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.management.relation.Role;
 
 /**
  * Created by Joohan Lee on 2020/02/15
@@ -20,16 +26,18 @@ public class User {
   private long telegramId;
   private String lastName;
   private String firstName;
-  private String username;
+  private String email;
   private String password;
   private List<UserRole> roles;
 
   @Builder
-  public User(long telegramId, String lastName, String firstName, String username) {
+  public User(long telegramId, String lastName, String firstName, String email, String password) {
     this.telegramId = telegramId;
     this.lastName = lastName;
     this.firstName = firstName;
-    this.username = username;
+    this.email = email;
+    this.password = password;
+    this.roles = Arrays.asList(UserRole.ROLE_USER);
   }
 
   public String getFullName() {

@@ -17,20 +17,26 @@ public class UserService {
   private final UserRepository userRepository;
 
   @Transactional(readOnly = true)
-  public Mono<User> get(Mono<Long> telegramId) {
-    return userRepository.findByTelegramId(telegramId);
+  public Mono<User> get(Mono<Long> telegramIdMono) {
+    return telegramIdMono.flatMap(userRepository::findByTelegramId);
   }
 
   @Transactional
   public Mono<User> getOrRegister(Mono<User> userMono) {
 //    return userRepository.findByTelegramId(userMono.);
-    return userRepository.findByTelegramId(
-        userMono.map(User::getTelegramId)
-    ).flatMap(user -> userRepository.save(user));
+    return userMono
+            .map(User::getTelegramId)
+            .<User>flatMap(userRepository::findByTelegramId)
+            .switchIfEmpty(userMono.flatMap(userRepository::save));
+  }
+
+  @Transactional
+  public Mono<User> register(Mono<User> userMono) {
+    return userMono.flatMap(userRepository::save);
   }
 
   @Transactional(readOnly = true)
-  public Mono<User> findByUsername(Mono<String> username) {
-    return userRepository.findByUsername(username);
+  public Mono<User> findByEmail(Mono<String> emailMono) {
+    return emailMono.flatMap(userRepository::findByEmail);
   }
 }

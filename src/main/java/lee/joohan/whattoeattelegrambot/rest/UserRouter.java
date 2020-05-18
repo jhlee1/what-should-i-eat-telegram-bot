@@ -2,8 +2,8 @@ package lee.joohan.whattoeattelegrambot.rest;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 
-import lee.joohan.whattoeattelegrambot.handler.rest.LoginAuthenticationHandler;
-import lee.joohan.whattoeattelegrambot.handler.rest.UserLoginHandler;
+import lee.joohan.whattoeattelegrambot.handler.rest.UserRestHandler;
+import lee.joohan.whattoeattelegrambot.handler.rest.AuthenticationRestHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +18,8 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 @RequiredArgsConstructor
 @Configuration
 public class UserRouter {
-  private final UserLoginHandler userLoginHandler;
-  private final LoginAuthenticationHandler loginAuthenticationHandler;
+  private final AuthenticationRestHandler authenticationRestHandler;
+
 
 //  @Bean
 //  public RouterFunction userRoute() {
@@ -35,8 +35,8 @@ public class UserRouter {
   @Bean
   public RouterFunction authRoute() {
     return RouterFunctions.route()
-        .POST("/auth/login", accept(MediaType.APPLICATION_JSON), userLoginHandler::login)
-        .POST("/auth/signup", accept(MediaType.APPLICATION_JSON), userLoginHandler::signUp)
+        .POST("/auth/login", accept(MediaType.APPLICATION_JSON), authenticationRestHandler::login)
+        .POST("/auth/signup", accept(MediaType.APPLICATION_JSON), authenticationRestHandler::signUp)
         .build();
   }
 }
