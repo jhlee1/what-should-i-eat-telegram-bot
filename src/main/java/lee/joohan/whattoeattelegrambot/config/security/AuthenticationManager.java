@@ -5,7 +5,6 @@ import static lee.joohan.whattoeattelegrambot.common.AccessTokenKey.AUTHORITY_KE
 import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,11 +36,10 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
       Claims claims = tokenProvider.getAllClaimsFromToken(authToken);
       List<String> roles = claims.get(AUTHORITY_KEY, List.class);
       List<SimpleGrantedAuthority> authorities = roles.stream()
-              .map(role -> new SimpleGrantedAuthority(role))
-              .collect(Collectors.toList());
+          .map(role -> new SimpleGrantedAuthority(role))
+          .collect(Collectors.toList());
       UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, email, authorities);
-      SecurityContextHolder
-          .getContext().setAuthentication(new AuthenticatedUser(email, authorities));
+      SecurityContextHolder.getContext().setAuthentication(new AuthenticatedUser(email, authorities));
       return Mono.just(auth);
     } else {
       return Mono.empty();

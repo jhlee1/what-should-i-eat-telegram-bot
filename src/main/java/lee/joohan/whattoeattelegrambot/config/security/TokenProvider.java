@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.function.Function;
 
+import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.AccessTokenKey;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.domain.UserRole;
@@ -49,7 +50,10 @@ public class TokenProvider implements Serializable {
   public String generateToken(User user) {
     return Jwts.builder()
         .setSubject(user.getEmail())
-        .claim(AccessTokenKey.AUTHORITY_KEY, user.getRoles().stream().map(UserRole::name))
+        .claim(AccessTokenKey.AUTHORITY_KEY, user.getRoles()
+            .stream()
+            .map(UserRole::name)
+            .collect(Collectors.toList()))
         .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
         .setIssuer("anjajrqht")
         .setIssuedAt(new Date(System.currentTimeMillis()))

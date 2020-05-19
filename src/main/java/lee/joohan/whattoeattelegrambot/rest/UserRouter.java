@@ -2,7 +2,6 @@ package lee.joohan.whattoeattelegrambot.rest;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 
-import lee.joohan.whattoeattelegrambot.handler.rest.UserRestHandler;
 import lee.joohan.whattoeattelegrambot.handler.rest.AuthenticationRestHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

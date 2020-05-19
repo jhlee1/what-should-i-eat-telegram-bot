@@ -31,12 +31,12 @@ public class UserService {
   }
 
   @Transactional
-  public Mono<User> register(Mono<User> userMono) {
-    return userMono.flatMap(userRepository::save);
+  public Mono<User> register(User user) {
+    return userRepository.save(user);
   }
 
   @Transactional(readOnly = true)
   public Mono<User> findByEmail(Mono<String> emailMono) {
-    return emailMono.flatMap(userRepository::findByEmail);
+    return userRepository.findByEmail(emailMono);
   }
 }

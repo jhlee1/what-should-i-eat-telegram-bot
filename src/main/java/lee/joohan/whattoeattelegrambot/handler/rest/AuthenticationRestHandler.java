@@ -25,45 +25,45 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Component
 public class AuthenticationRestHandler {
-    private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final TokenProvider tokenProvider;
+  private final UserService userService;
+  private final BCryptPasswordEncoder passwordEncoder;
+  private final TokenProvider tokenProvider;
 
-    public Mono<ServerResponse> login(ServerRequest request) {
-        return
-                request.bodyToMono(LoginRequest.class)
-                        .zipWhen(loginRequest -> userService.findByEmail(Mono.just(loginRequest.getEmail())))
-                        .flatMap(loginRequestAndUser -> {
-                            if (passwordEncoder.matches(loginRequestAndUser.getT1().getPassword(), loginRequestAndUser.getT2().getPassword())) {
-                                return ServerResponse.ok().contentType(APPLICATION_JSON).body(fromValue(new LoginResponse(tokenProvider.generateToken(loginRequestAndUser.getT2()))));
-                            } else {
-                                return ServerResponse.badRequest().body(fromValue("Invalid credentials"));
-                            }
-                        }).switchIfEmpty(ServerResponse.badRequest().body(fromValue("User does not exist")));
-    }
+  public Mono<ServerResponse> login(ServerRequest request) {
+    return request.bodyToMono(LoginRequest.class)
+        .zipWhen(loginRequest -> userService.findByEmail(Mono.just(loginRequest.getEmail())))
+        .flatMap(loginRequestAndUser -> {
+          if (passwordEncoder.matches(loginRequestAndUser.getT1().getPassword(), loginRequestAndUser.getT2().getPassword())) {
+            return ServerResponse.ok().contentType(APPLICATION_JSON).body(fromValue(new LoginResponse(tokenProvider.generateToken(loginRequestAndUser.getT2()))));
+          } else {
+            return ServerResponse.badRequest().body(fromValue("Invalid credentials"));
+          }
+        }).switchIfEmpty(ServerResponse.badRequest().body(fromValue("User does not exist")));
+  }
 
-    public Mono<ServerResponse> signUp(ServerRequest request) {
-        Mono<SignUpRequest> userMono = request.bodyToMono(SignUpRequest.class);
-        return userMono.flatMap(signUpRequest ->
-                userService.findByEmail(Mono.just(signUpRequest.getEmail()))
-                        .flatMap(user ->
-                                ServerResponse.badRequest()
-                                        .body(fromValue(String.format("The email[%s] is already registered.", user.getEmail())))
-                        ).switchIfEmpty(
-                        userMono.flatMap(it -> {
-                            User user = User.builder()
-                                    .email(it.getEmail())
-                                    .password(it.getPassword())
-                                    .build();
+  public Mono<ServerResponse> signUp(ServerRequest request) {
+    Mono<SignUpRequest> userMono = request.bodyToMono(SignUpRequest.class).cache();
 
-                            return userService.register(Mono.just(user));
-                        })
-                                .flatMap(user ->
-                                ServerResponse.ok()
-                                        .contentType(APPLICATION_JSON)
-                                        .body(new LoginResponse(tokenProvider.generateToken(user)), LoginResponse.class)
-                        )
+    return userMono.flatMap(signUpRequest ->
+        userService.findByEmail(Mono.just(signUpRequest.getEmail()))
+            .flatMap(user ->
+                ServerResponse.badRequest()
+                    .body(fromValue(String.format("The email[%s] is already registered.", user.getEmail())))
+            ).switchIfEmpty(
+            userMono.flatMap(it -> {
+              User user = User.builder()
+                  .email(it.getEmail())
+                  .password(it.getPassword())
+                  .build();
+
+              return userService.register(user);
+            })
+                .flatMap(user ->
+                    ServerResponse.ok()
+                        .contentType(APPLICATION_JSON)
+                        .body(fromValue(new LoginResponse(tokenProvider.generateToken(user))))
                 )
-        ).log();
-    }
+        )
+    );
+  }
 }
