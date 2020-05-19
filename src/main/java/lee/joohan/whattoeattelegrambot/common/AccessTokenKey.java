@@ -5,5 +5,6 @@ package lee.joohan.whattoeattelegrambot.common;
  */
 public class AccessTokenKey {
   public static final String AUTHORITY_KEY = "roles";
+  public static final String USER_ID_KEY = "userId";
 
 }

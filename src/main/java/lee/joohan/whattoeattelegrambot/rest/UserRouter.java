@@ -36,6 +36,7 @@ public class UserRouter {
     return RouterFunctions.route()
         .POST("/auth/login", accept(MediaType.APPLICATION_JSON), authenticationRestHandler::login)
         .POST("/auth/signup", accept(MediaType.APPLICATION_JSON), authenticationRestHandler::signUp)
+        .GET("/auth/token", accept(MediaType.APPLICATION_JSON), authenticationRestHandler::token)
         .build();
   }
 }

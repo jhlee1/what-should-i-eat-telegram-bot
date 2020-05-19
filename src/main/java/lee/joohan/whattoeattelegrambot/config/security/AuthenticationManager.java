@@ -1,11 +1,13 @@
 package lee.joohan.whattoeattelegrambot.config.security;
 
 import static lee.joohan.whattoeattelegrambot.common.AccessTokenKey.AUTHORITY_KEY;
+import static lee.joohan.whattoeattelegrambot.common.AccessTokenKey.USER_ID_KEY;
 
 import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -38,8 +40,10 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
       List<SimpleGrantedAuthority> authorities = roles.stream()
           .map(role -> new SimpleGrantedAuthority(role))
           .collect(Collectors.toList());
+      Object userId = claims.get(USER_ID_KEY, Object.class);
+
       UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, email, authorities);
-      SecurityContextHolder.getContext().setAuthentication(new AuthenticatedUser(email, authorities));
+      SecurityContextHolder.getContext().setAuthentication(new AuthenticatedUser(email, authorities, userId));
       return Mono.just(auth);
     } else {
       return Mono.empty();

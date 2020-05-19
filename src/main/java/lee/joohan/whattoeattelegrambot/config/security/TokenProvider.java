@@ -1,5 +1,7 @@
 package lee.joohan.whattoeattelegrambot.config.security;
 
+import static lee.joohan.whattoeattelegrambot.common.AccessTokenKey.USER_ID_KEY;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -54,6 +56,7 @@ public class TokenProvider implements Serializable {
             .stream()
             .map(UserRole::name)
             .collect(Collectors.toList()))
+        .claim(USER_ID_KEY, user.getId())
         .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
         .setIssuer("anjajrqht")
         .setIssuedAt(new Date(System.currentTimeMillis()))

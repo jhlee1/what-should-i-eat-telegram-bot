@@ -11,6 +11,7 @@ import lee.joohan.whattoeattelegrambot.dto.response.LoginResponse;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -33,7 +34,7 @@ public class AuthenticationRestHandler {
     return request.bodyToMono(LoginRequest.class)
         .zipWhen(loginRequest -> userService.findByEmail(Mono.just(loginRequest.getEmail())))
         .flatMap(loginRequestAndUser -> {
-          if (passwordEncoder.matches(loginRequestAndUser.getT1().getPassword(), loginRequestAndUser.getT2().getPassword())) {
+          if (loginRequestAndUser.getT1().getPassword().equals(loginRequestAndUser.getT2().getPassword())) { //TODO: Encrypt된 걸로 받기 passwordEncoder.match()
             return ServerResponse.ok().contentType(APPLICATION_JSON).body(fromValue(new LoginResponse(tokenProvider.generateToken(loginRequestAndUser.getT2()))));
           } else {
             return ServerResponse.badRequest().body(fromValue("Invalid credentials"));
@@ -65,5 +66,9 @@ public class AuthenticationRestHandler {
                 )
         )
     );
+  }
+
+  public Mono<ServerResponse> token(ServerRequest serverRequest) {
+      return serverRequest.principal().flatMap(principal -> ServerResponse.ok().bodyValue(principal)).log();
   }
 }
