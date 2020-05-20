@@ -1,15 +1,18 @@
 package lee.joohan.whattoeattelegrambot.handler.rest;
 
-import lee.joohan.whattoeattelegrambot.domain.CorporateCard;
+import lee.joohan.whattoeattelegrambot.config.security.AccessToken;
 import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
 import lee.joohan.whattoeattelegrambot.dto.request.PutBackCorporateCardRequest;
 import lee.joohan.whattoeattelegrambot.dto.request.UseCorporateCardRequest;
+import lee.joohan.whattoeattelegrambot.dto.response.PutBackCorporateCardResponse;
+import lee.joohan.whattoeattelegrambot.dto.response.UseCorporateCardResponse;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
 /**
  * Created by Joohan Lee on 2020/05/14
@@ -24,30 +27,32 @@ public class CorporateCardRestHandler {
     return corporateCardService.listCardStatuses();
   }
 
-  public Mono<CorporateCard> use(Mono<UseCorporateCardRequest> useCorporateCardRequestMono) {
-    return useCorporateCardRequestMono.flatMap(useCorporateCardRequest ->
-        corporateCardService.use(
-            Mono.just(
-                Tuples.of(
-                    useCorporateCardRequest.getCardNum(),
-                    useCorporateCardRequest.getUserId()))
+  public Mono<UseCorporateCardResponse> use(ServerRequest serverRequest) {
+    return serverRequest.bodyToMono(UseCorporateCardRequest.class)
+        .map(request -> request.getCardNum())
+        .zipWith(
+            serverRequest
+                .exchange()
+                .getPrincipal()
+                .map(principal -> (AccessToken) principal)
+                .map(accessToken -> new ObjectId(accessToken.getCredentials().toString()))
         )
-    );
-
-//    return useCorporateCardRequestMono.map(useCorporateCardRequest -> new CorporateCard(useCorporateCardRequest.getCardNum()));
+        .flatMap(cardNumAndUserId -> corporateCardService.use(Mono.just(cardNumAndUserId)))
+        .map(UseCorporateCardResponse::new);
   }
 
-  public Mono<CorporateCard> putBack(Mono<PutBackCorporateCardRequest> putBackCorporateCardRequestMono) {
-    return putBackCorporateCardRequestMono.flatMap(putBackCorporateCardRequest ->
-        corporateCardService.putBack(
-            Mono.just(
-                Tuples.of(
-                    putBackCorporateCardRequest.getCardNum(),
-                    putBackCorporateCardRequest.getUserId()
-                )
-            )
+  public Mono<PutBackCorporateCardResponse> putBack(ServerRequest serverRequest) {
+    return serverRequest.bodyToMono(PutBackCorporateCardRequest.class)
+        .map(request -> request.getCardNum())
+        .zipWith(
+            serverRequest
+                .exchange()
+                .getPrincipal()
+                .map(principal -> (AccessToken) principal)
+                .map(accessToken -> new ObjectId(accessToken.getCredentials().toString()))
         )
-    );
+        .flatMap(cardNumAndUserId -> corporateCardService.putBack(Mono.just(cardNumAndUserId)))
+        .map(PutBackCorporateCardResponse::new);
   }
 
 }

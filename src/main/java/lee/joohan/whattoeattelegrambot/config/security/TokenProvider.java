@@ -56,7 +56,7 @@ public class TokenProvider implements Serializable {
             .stream()
             .map(UserRole::name)
             .collect(Collectors.toList()))
-        .claim(USER_ID_KEY, user.getId())
+        .claim(USER_ID_KEY, user.getId().toHexString())
         .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
         .setIssuer("anjajrqht")
         .setIssuedAt(new Date(System.currentTimeMillis()))

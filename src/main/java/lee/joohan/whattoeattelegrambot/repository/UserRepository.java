@@ -10,5 +10,5 @@ import reactor.core.publisher.Mono;
  */
 public interface UserRepository extends ReactiveMongoRepository<User, ObjectId> {
   Mono<User> findByTelegramId(long telegramId);
-  Mono<User> findByEmail(Mono<String> email);
+  Mono<User> findByEmail(String email);
 }

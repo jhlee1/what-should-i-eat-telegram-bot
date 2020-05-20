@@ -7,9 +7,7 @@ import io.jsonwebtoken.Claims;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,9 +38,9 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
       List<SimpleGrantedAuthority> authorities = roles.stream()
           .map(role -> new SimpleGrantedAuthority(role))
           .collect(Collectors.toList());
-      Object userId = claims.get(USER_ID_KEY, Object.class);
+      String userId = claims.get(USER_ID_KEY, String.class);
 
-      UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(email, email, authorities);
+      AccessToken auth = new AccessToken(authorities, userId, email);
       SecurityContextHolder.getContext().setAuthentication(new AuthenticatedUser(email, authorities, userId));
       return Mono.just(auth);
     } else {

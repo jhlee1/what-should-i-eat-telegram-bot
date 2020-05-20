@@ -20,6 +20,7 @@ public class ResponseMessage {
   public static final String USE_CORPORATE_CARD = "카드 사용 등록 완료";
   public static final String RETURN_CORPORATE_CARD = "카드 반납 완료";
 
+  public static final String VERIFY_ACCOUNT = "계정 인증 완료";
 
   public static final String REGISTER_RESTAURANT_ARGS_ERROR_RESPONSE = "식당등록 실패. 입력 형식을 확인하세요. (ex. /맛집추가 이름)";
   public static final String DELETE_RESTAURANT_ARGS_ERROR_RESPONSE = "식당삭제 실패. 입력 형식을 확인하세요. (ex. /맛집삭제 이름)";
@@ -27,7 +28,6 @@ public class ResponseMessage {
   public static final String REGISTER_MENU_ARGS_ERROR_RESPONSE = "메뉴등록 실패. 입력 형식을 확인하세요. (ex. /메뉴추가 맛집이름 메뉴 (가격))";
   public static final String EAT_OR_NOT_ARGS_ERROR_RESPONSE = "메뉴를 입력하세요. (ex. /먹을까 탕수육)";
   public static final String RANDOM_PICK_ARGS_ERROR_RESPONSE = "뭐먹 잘못된 입력. (ex. /뭐먹 || /뭐먹 2)";
-
 
   public static final String REGISTER_CAFE_ARGS_ERROR_RESPONSE = "카페등록 실패. 입력 형식을 확인하세요. (ex. /카페추가 이름)";
 
@@ -37,6 +37,10 @@ public class ResponseMessage {
   public static final String PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE = "카드 반납 실패. 입력 형식을 확인하세요. (ex. /카드반납 번호)";
   public static final String PUT_BACK_NOT_OWNED_CORPORATE_CARD_ERROR_RESPONSE = "카드 반납 실패. 입력 형식을 확인하세요. (ex. /카드반납 번호)";
 
+  public static final String VERIFY_ACCOUNT_ARGS_ERROR_RESPONSE = "계정 인증 실패. 입력 형식을 확인하세요. (ex. /인증 joolee@ogqcorp.com)";
+  public static final String VERIFY_ACCOUNT_NOT_FOUND_USER_ERROR_RESPONSE = "계정 인증 실패. 찾을 수 없는 계정입니다. (ex. /인증 joolee@ogqcorp.com)";
+  public static final String ALREADY_VERIFIED_EMAIL_ERROR_RESPONSE = "계정 인증 실패. 이미 인증된 이메일입니다.";
+  public static final String ALREADY_VERIFIED_TELEGRAM_ID_ERROR_RESPONSE = "계정 인증 실패. 해당 텔레그램 계정은 이미 인증되었습니다.";
 
   public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
 }

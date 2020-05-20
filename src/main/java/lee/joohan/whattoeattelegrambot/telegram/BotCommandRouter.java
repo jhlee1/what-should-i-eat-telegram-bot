@@ -12,6 +12,7 @@ import static lee.joohan.whattoeattelegrambot.common.BotCommand.NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RANDOM_PICK;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RETURN_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.USE_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.VERIFY_ACCOUNT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 
 import java.util.Optional;
@@ -21,6 +22,7 @@ import lee.joohan.whattoeattelegrambot.config.HandleException;
 import lee.joohan.whattoeattelegrambot.handler.bot.CafeBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.CorporateCardBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.RestaurantBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.UserBotCommandHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -38,6 +40,7 @@ public class BotCommandRouter {
   private final RestaurantBotCommandHandler restaurantBotCommandHandler;
   private final CafeBotCommandHandler cafeBotCommandHandler;
   private final CorporateCardBotCommandHandler corporateCardBotCommandHandler;
+  private final UserBotCommandHandler userBotCommandHandler;
 
 
   @HandleException
@@ -75,6 +78,8 @@ public class BotCommandRouter {
         return corporateCardBotCommandHandler.listCards();
       case EAT_OR_NOT:
         return restaurantBotCommandHandler.eatOrNot(Mono.just(message));
+      case VERIFY_ACCOUNT:
+        return userBotCommandHandler.verify(Mono.just(message));
       case BotCommand.EMPTY:
         return null;
       default:
