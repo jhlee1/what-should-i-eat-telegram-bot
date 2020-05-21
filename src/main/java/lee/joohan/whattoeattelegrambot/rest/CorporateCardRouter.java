@@ -1,9 +1,7 @@
 package lee.joohan.whattoeattelegrambot.rest;
 
-import lee.joohan.whattoeattelegrambot.dto.response.CorporateCardStatusResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.ErrorResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.PutBackCorporateCardResponse;
-import lee.joohan.whattoeattelegrambot.dto.response.UseCorporateCardResponse;
 import lee.joohan.whattoeattelegrambot.handler.rest.CorporateCardRestHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,20 +22,8 @@ public class CorporateCardRouter {
   @Bean
   public RouterFunction<?> corporateCardRoutes() {
     return RouterFunctions.route()
-        .GET("/corporateCards", request ->
-            ServerResponse.ok()
-                .body(
-                    corporateCardRestHandler
-                        .getCorporateCardStatuses()
-                        .map(CorporateCardStatusResponse::new),
-                    CorporateCardStatusResponse.class
-                )
-        )
-        .PUT("/corporateCards/use", request ->
-            ServerResponse.ok()
-                .body(corporateCardRestHandler.use(request), UseCorporateCardResponse.class)
-                .doOnError(error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
-        )
+        .GET("/corporateCards", corporateCardRestHandler::getCorporateCardStatuses)
+        .PUT("/corporateCards/use", corporateCardRestHandler::use)
         .PUT("/corporateCards/putBack", request ->
             ServerResponse.ok()
                 .body(corporateCardRestHandler.putBack(request), PutBackCorporateCardResponse.class)

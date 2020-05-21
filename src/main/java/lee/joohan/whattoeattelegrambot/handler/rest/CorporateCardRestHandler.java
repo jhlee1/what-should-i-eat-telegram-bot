@@ -1,9 +1,10 @@
 package lee.joohan.whattoeattelegrambot.handler.rest;
 
 import lee.joohan.whattoeattelegrambot.config.security.AccessToken;
-import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
 import lee.joohan.whattoeattelegrambot.dto.request.PutBackCorporateCardRequest;
 import lee.joohan.whattoeattelegrambot.dto.request.UseCorporateCardRequest;
+import lee.joohan.whattoeattelegrambot.dto.response.CorporateCardStatusResponse;
+import lee.joohan.whattoeattelegrambot.dto.response.ErrorResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.PutBackCorporateCardResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.UseCorporateCardResponse;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
@@ -11,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
-import reactor.core.publisher.Flux;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -23,11 +24,14 @@ import reactor.core.publisher.Mono;
 public class CorporateCardRestHandler {
   private final CorporateCardService corporateCardService;
 
-  public Flux<CorporateCardStatus> getCorporateCardStatuses() {
-    return corporateCardService.listCardStatuses();
+  public Mono<ServerResponse> getCorporateCardStatuses(ServerRequest serverRequest) {
+    return corporateCardService.listCardStatuses()
+        .map(CorporateCardStatusResponse::new)
+        .collectList()
+        .flatMap(corporateCardStatusResponse -> ServerResponse.ok().bodyValue(corporateCardStatusResponse));
   }
 
-  public Mono<UseCorporateCardResponse> use(ServerRequest serverRequest) {
+  public Mono<ServerResponse> use(ServerRequest serverRequest) {
     return serverRequest.bodyToMono(UseCorporateCardRequest.class)
         .map(request -> request.getCardNum())
         .zipWith(
@@ -38,7 +42,9 @@ public class CorporateCardRestHandler {
                 .map(accessToken -> new ObjectId(accessToken.getCredentials().toString()))
         )
         .flatMap(cardNumAndUserId -> corporateCardService.use(Mono.just(cardNumAndUserId)))
-        .map(UseCorporateCardResponse::new);
+        .map(UseCorporateCardResponse::new)
+        .flatMap(res -> ServerResponse.ok().bodyValue(res))
+        .onErrorResume(throwable -> ServerResponse.badRequest().bodyValue(new ErrorResponse("카드 반납실패")));
   }
 
   public Mono<PutBackCorporateCardResponse> putBack(ServerRequest serverRequest) {
