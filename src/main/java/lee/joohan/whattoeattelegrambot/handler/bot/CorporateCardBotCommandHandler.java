@@ -89,7 +89,14 @@ public class CorporateCardBotCommandHandler {
 
   public Mono<String> listCards() {
     return corporateCardService.listCardStatuses()
-        .map(cardStatus -> String.format("카드 번호: %s, 사용자: %s, 반납여부: %s", cardStatus.getCardNum(), cardStatus.getUserInfo().getFullName(), !cardStatus.isBorrowed()))
-        .collect(Collectors.joining("\n"));
+        .map(cardStatus ->
+            String.format(
+                "카드 번호: %s, 사용자: %s, 반납여부: %s",
+                cardStatus.getCardNum(),
+                cardStatus.getUserInfo().getFullName(),
+                !cardStatus.isBorrowed())
+        )
+        .collect(Collectors.joining("\n"))
+        .switchIfEmpty(Mono.just("등록된 카드가 없습니다."));
   }
 }

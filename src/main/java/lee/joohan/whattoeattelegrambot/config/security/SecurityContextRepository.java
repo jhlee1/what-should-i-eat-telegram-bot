@@ -1,11 +1,10 @@
 package lee.joohan.whattoeattelegrambot.config.security;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
@@ -32,24 +31,16 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
-        ServerHttpRequest serverHttpRequest = exchange.getRequest();
+        return Optional.ofNullable(exchange.getRequest().getHeaders())
+            .map(headers -> headers.getFirst(HttpHeaders.AUTHORIZATION))
+            .filter(authHeader -> authHeader.startsWith(TOKEN_PREFIX))
+            .map(authHeader -> authHeader.replace(TOKEN_PREFIX, ""))
+            .map(authToken -> new UsernamePasswordAuthenticationToken(authToken, authToken))
+            .map(authentication -> this.authenticationManager.authenticate(authentication).map(auth -> (SecurityContext) new SecurityContextImpl(auth)))
+            .orElseGet(() -> {
+                log.warn("Could not find bearer String, will ignore the header.");
 
-        String authHeader = serverHttpRequest.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
-        String authToken = null;
-
-        if (authHeader != null && authHeader.startsWith(TOKEN_PREFIX)) {
-            authToken = authHeader.replace(TOKEN_PREFIX, "");
-        } else {
-            log.warn("Could not find bearer String, will ignore the header.");
-        }
-
-        if (authToken != null) {
-            Authentication authentication = new UsernamePasswordAuthenticationToken(authToken, authToken);
-
-            return this.authenticationManager.authenticate(authentication).map(auth -> new SecurityContextImpl(auth));
-        } else {
-            return Mono.empty();
-        }
+                return Mono.empty();
+            });
     }
 }

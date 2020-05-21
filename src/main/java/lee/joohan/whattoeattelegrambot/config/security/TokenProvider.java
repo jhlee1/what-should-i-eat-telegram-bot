@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenProvider implements Serializable {
   private static final String SIGNING_KEY = "ajnajrqhtxptmxmwnd"; //TODO: Resource로 옮기기
-  private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 3600;
+  private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 3600000;
 
   public String getEmailFromToken(String token) {
     return getClaimFromToken(token, Claims::getSubject);
@@ -56,7 +56,7 @@ public class TokenProvider implements Serializable {
             .stream()
             .map(UserRole::name)
             .collect(Collectors.toList()))
-        .claim(USER_ID_KEY, user.getId())
+        .claim(USER_ID_KEY, user.getId().toHexString())
         .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
         .setIssuer("anjajrqht")
         .setIssuedAt(new Date(System.currentTimeMillis()))

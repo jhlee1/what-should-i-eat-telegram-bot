@@ -7,11 +7,13 @@ import lee.joohan.whattoeattelegrambot.config.security.TokenProvider;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.dto.request.LoginRequest;
 import lee.joohan.whattoeattelegrambot.dto.request.SignUpRequest;
+import lee.joohan.whattoeattelegrambot.dto.response.ErrorResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.LoginResponse;
+import lee.joohan.whattoeattelegrambot.dto.response.SignUpResponse;
+import lee.joohan.whattoeattelegrambot.exception.TelegramNotVerifiedException;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.ExampleMatcher.StringMatcher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -30,16 +32,24 @@ public class AuthenticationRestHandler {
   private final BCryptPasswordEncoder passwordEncoder;
   private final TokenProvider tokenProvider;
 
+
   public Mono<ServerResponse> login(ServerRequest request) {
     return request.bodyToMono(LoginRequest.class)
         .zipWhen(loginRequest -> userService.findByEmail(Mono.just(loginRequest.getEmail())))
+        .flatMap(loginRequestUser -> {
+          if (!loginRequestUser.getT2().isTelegramVerified()) {
+            return Mono.error(TelegramNotVerifiedException.fromUserId(loginRequestUser.getT2().getId()));
+          }
+          return Mono.just(loginRequestUser);
+        })
         .flatMap(loginRequestAndUser -> {
-          if (loginRequestAndUser.getT1().getPassword().equals(loginRequestAndUser.getT2().getPassword())) { //TODO: Encrypt된 걸로 받기 passwordEncoder.match()
+          if (passwordEncoder.matches(loginRequestAndUser.getT1().getPassword(), loginRequestAndUser.getT2().getPassword())) { //TODO: Encrypt된 걸로 받기 passwordEncoder.match()
             return ServerResponse.ok().contentType(APPLICATION_JSON).body(fromValue(new LoginResponse(tokenProvider.generateToken(loginRequestAndUser.getT2()))));
           } else {
-            return ServerResponse.badRequest().body(fromValue("Invalid credentials"));
+            return ServerResponse.badRequest().body(fromValue(new ErrorResponse("Invalid credentials")));
           }
-        }).switchIfEmpty(ServerResponse.badRequest().body(fromValue("User does not exist")));
+        }).switchIfEmpty(ServerResponse.badRequest().body(fromValue(new ErrorResponse("User does not exist"))))
+        .onErrorResume(TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())));
   }
 
   public Mono<ServerResponse> signUp(ServerRequest request) {
@@ -49,12 +59,12 @@ public class AuthenticationRestHandler {
         userService.findByEmail(Mono.just(signUpRequest.getEmail()))
             .flatMap(user ->
                 ServerResponse.badRequest()
-                    .body(fromValue(String.format("The email[%s] is already registered.", user.getEmail())))
+                    .body(fromValue(new ErrorResponse("The email[%s] is already registered.", user.getEmail())))
             ).switchIfEmpty(
             userMono.flatMap(it -> {
               User user = User.builder()
                   .email(it.getEmail())
-                  .password(it.getPassword())
+                  .password(passwordEncoder.encode(it.getPassword()))
                   .build();
 
               return userService.register(user);
@@ -62,7 +72,7 @@ public class AuthenticationRestHandler {
                 .flatMap(user ->
                     ServerResponse.ok()
                         .contentType(APPLICATION_JSON)
-                        .body(fromValue(new LoginResponse(tokenProvider.generateToken(user))))
+                        .body(fromValue(new SignUpResponse(true)))
                 )
         )
     );
