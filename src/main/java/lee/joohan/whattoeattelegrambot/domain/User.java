@@ -1,5 +1,6 @@
 package lee.joohan.whattoeattelegrambot.domain;
 
+import java.security.AuthProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,10 @@ public class User {
   private String email;
   private String password;
   private List<UserRole> roles;
+
+  //TODO: 필요한 부분일까
+  private SocialAuthProvider provider;
+  private String providerId;
 
   @Builder
   public User(long telegramId, String lastName, String firstName, String email, String password) {
