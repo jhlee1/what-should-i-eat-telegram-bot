@@ -1,7 +1,5 @@
 package lee.joohan.whattoeattelegrambot.domain;
 
-import java.security.AuthProvider;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
@@ -28,19 +26,17 @@ public class User {
   private String email;
   private String password;
   private List<UserRole> roles;
+  private String picture;
   private boolean telegramVerified;
 
-  //TODO: 필요한 부분일까
-  private SocialAuthProvider provider;
-  private String providerId;
-
   @Builder
-  public User(long telegramId, String lastName, String firstName, String email, String password) {
+  public User(long telegramId, String lastName, String firstName, String email, String password, String picture) {
     this.telegramId = telegramId;
     this.lastName = lastName;
     this.firstName = firstName;
     this.email = email;
     this.password = password;
+    this.picture = picture;
     this.roles = Arrays.asList(UserRole.ROLE_USER);
   }
 
