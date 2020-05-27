@@ -1,16 +1,12 @@
 package lee.joohan.whattoeattelegrambot.config.oauth;
 
-import java.util.Collections;
-import java.util.stream.Collectors;
-import lee.joohan.whattoeattelegrambot.domain.User;
-import lee.joohan.whattoeattelegrambot.repository.UserRepository;
+import lee.joohan.whattoeattelegrambot.domain.OAuthUserInfo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultReactiveOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.ReactiveOAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -21,37 +17,24 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Service
-public class CustomReactiveOAuth2ClientService implements ReactiveOAuth2UserService {
-  private final UserRepository userRepository;
+@Slf4j
+public class CustomReactiveOAuth2ClientService implements ReactiveOAuth2UserService<OAuth2UserRequest, OAuth2User> {
+  private final OAuthUserInfoRepository oAuthUserInfoRepository;
 
   @Override
-  public Mono loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-    ReactiveOAuth2UserService delegate = new DefaultReactiveOAuth2UserService();
-    Mono<OAuth2User> oAuth2UserMono = delegate.loadUser(userRequest);
-
-    String registrationId = userRequest.getClientRegistration().getRegistrationId();
-    String userNameAttributeName = userRequest.getClientRegistration()
-        .getProviderDetails()
-        .getUserInfoEndpoint()
-        .getUserNameAttributeName();
-
-    OAuthAttributes attributes = oAuth2UserMono
-        .map(oauth2User -> OAuthAttributes.of(registrationId, userNameAttributeName, oauth2User.getAttributes()))
-        .map(oAuthAttributes -> saveOrUpdate(oAuthAttributes))
-        .map(user -> new DefaultOAuth2User(user.getRoles().stream()
-        .map(Enum::name)
-        .map(SimpleGrantedAuthority::new).collect(Collectors.toList()), user.a));
-
-    User user = saveOrUpdate(attributes);
-
-    return ;
-  }
+  public Mono<OAuth2User> loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    final DefaultReactiveOAuth2UserService delegate = new DefaultReactiveOAuth2UserService();
+    final String clientRegistrationId = userRequest.getClientRegistration().getRegistrationId();
 
 
-  private Mono<User> saveOrUpdate(OAuthAttributes oAuthAttributes) {
-    return userRepository.findByEmail(oAuthAttributes.getEmail())
-        .switchIfEmpty(Mono.fromSupplier(() -> oAuthAttributes.toEntity()))
-        .flatMap(it -> userRepository.save(it));
+    return delegate.loadUser(userRequest)
+        .log("Filtered at oauth2 client")
+        .flatMap(e -> {
+          OAuthUserInfo oAuth2UserInfo = OAuthUserInfoFactory.getOAuthUserInfo(clientRegistrationId, e.getAttributes());
 
+          return oAuthUserInfoRepository
+              .findByEmail(oAuth2UserInfo.getName())
+              .switchIfEmpty(Mono.defer(() -> oAuthUserInfoRepository.save(oAuth2UserInfo)));
+        });
   }
 }

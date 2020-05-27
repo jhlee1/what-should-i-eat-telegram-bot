@@ -2,6 +2,7 @@ package lee.joohan.whattoeattelegrambot.domain;
 
 import java.util.Collection;
 import java.util.Map;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
@@ -9,15 +10,15 @@ import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 /**
  * Created by Joohan Lee on 2020/05/22
  */
-public class UserOAuthInfoGoogle extends UserOAuthInfo {
+public class GoogleOAuthUserInfo extends OAuthUserInfo {
 
-  public UserOAuthInfoGoogle(Map<String, Object> attributes) {
+  public GoogleOAuthUserInfo(Map<String, Object> attributes) {
     super(attributes);
   }
 
   @Override
-  protected SocialAuthProvider getAuthProviderEnum() {
-    return SocialAuthProvider.GOOGLE;
+  protected CommonOAuth2Provider getAuthProviderEnum() {
+    return CommonOAuth2Provider.GOOGLE;
   }
 
   @Override

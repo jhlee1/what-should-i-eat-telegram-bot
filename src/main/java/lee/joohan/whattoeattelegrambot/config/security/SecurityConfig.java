@@ -1,6 +1,5 @@
 package lee.joohan.whattoeattelegrambot.config.security;
 
-import lee.joohan.whattoeattelegrambot.config.oauth.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +7,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -24,10 +22,9 @@ import reactor.core.publisher.Mono;
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
   private final AuthenticationManager authenticationManager;
   private final SecurityContextRepository securityContextRepository;
-  private final CustomOAuth2UserService customOAuth2UserService;
 
   @Bean
   SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity httpSecurity) {
@@ -51,42 +48,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .cors().disable()
         .httpBasic().disable()
         .formLogin().disable()
-        .oauth2Login()
-        .authorizedClientService()
+        .oauth2Login(Customizer.withDefaults())
         .logout()
         .and()
         .exceptionHandling()
-        .authenticationEntryPoint((exchange, e) -> Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED)))
+//        .authenticationEntryPoint((exchange, e) -> Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED)))
         .accessDeniedHandler((exchange, denied) -> Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))
         .and()
         .csrf().disable()
         .authenticationManager(authenticationManager)
         .securityContextRepository(securityContextRepository)
         .authorizeExchange()
-        .pathMatchers(exceptions).permitAll()
+        .pathMatchers(exceptions).authenticated()
         .pathMatchers(HttpMethod.OPTIONS).permitAll()
-        .anyExchange().authenticated()
+        .anyExchange().permitAll()
         .and()
         .build();
   }
 
-  @Override
-  protected void configure(HttpSecurity httpSecurity) throws Exception {
-    String[] exceptions = new String[] {"/auth/**", "/css/**", "/images/**", "/js/**"};
 
-    httpSecurity.csrf().disable()
-        .authorizeRequests()
-        .antMatchers(exceptions).permitAll()
-        .antMatchers(HttpMethod.OPTIONS).permitAll()
-        .anyRequest().authenticated()
-        .and()
-        .logout().logoutSuccessUrl("/")
-        .and()
-        .oauth2Login()
-        .userInfoEndpoint()
-        .userService(customOAuth2UserService);
-
-  }
 
   @Bean
   public BCryptPasswordEncoder passwordEncoder() { //TODO: 필요 없어보이는데 확인하고 빼기

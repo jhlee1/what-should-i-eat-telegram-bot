@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
@@ -16,9 +17,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 @Document(collection = "userOAuthInfo")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public abstract class UserOAuthInfo implements OidcUser, Serializable {
-  protected static final long serialVersionUID = -5985744816336986462L;
-
+public abstract class OAuthUserInfo implements OidcUser, Serializable {
   @MongoId
   protected ObjectId id;
 
@@ -34,11 +33,10 @@ public abstract class UserOAuthInfo implements OidcUser, Serializable {
 
   protected Map<String, Object> attributes;
 
-  public UserOAuthInfo(Map<String, Object> attributes) {
+  public OAuthUserInfo(Map<String, Object> attributes) {
     this.attributes = attributes;
   }
 
-
   protected abstract void setAttribute();
-  protected abstract SocialAuthProvider getAuthProviderEnum();
+  protected abstract CommonOAuth2Provider getAuthProviderEnum();
 }
