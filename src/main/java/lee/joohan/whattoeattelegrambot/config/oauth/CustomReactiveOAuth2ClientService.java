@@ -26,14 +26,12 @@ public class CustomReactiveOAuth2ClientService implements ReactiveOAuth2UserServ
     final DefaultReactiveOAuth2UserService delegate = new DefaultReactiveOAuth2UserService();
     final String clientRegistrationId = userRequest.getClientRegistration().getRegistrationId();
 
-
     return delegate.loadUser(userRequest)
-        .log("Filtered at oauth2 client")
         .flatMap(e -> {
           OAuthUserInfo oAuth2UserInfo = OAuthUserInfoFactory.getOAuthUserInfo(clientRegistrationId, e.getAttributes());
 
           return oAuthUserInfoRepository
-              .findByEmail(oAuth2UserInfo.getName())
+              .findByEmail(oAuth2UserInfo.getEmail())
               .switchIfEmpty(Mono.defer(() -> oAuthUserInfoRepository.save(oAuth2UserInfo)));
         });
   }

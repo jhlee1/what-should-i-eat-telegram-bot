@@ -31,7 +31,7 @@ public class GoogleOAuthUserInfo extends OAuthUserInfo {
 
   @Override
   public Map<String, Object> getClaims() {
-    return null;
+    return attributes;
   }
 
   @Override

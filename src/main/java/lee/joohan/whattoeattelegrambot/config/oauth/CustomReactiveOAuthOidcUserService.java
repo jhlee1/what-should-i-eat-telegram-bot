@@ -25,7 +25,6 @@ public class CustomReactiveOAuthOidcUserService implements ReactiveOAuth2UserSer
 
     Mono<OidcUser> oAuthUser = delegate.loadUser(userRequest);
     return oAuthUser
-        .log("Filtered at oauth2 oidc")
         .flatMap(e -> {
       OAuthUserInfo oAuthUserInfo = OAuthUserInfoFactory.getOAuthUserInfo(clientRegistrationId, e.getAttributes());
 

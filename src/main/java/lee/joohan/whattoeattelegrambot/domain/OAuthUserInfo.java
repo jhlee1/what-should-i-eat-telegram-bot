@@ -35,6 +35,8 @@ public abstract class OAuthUserInfo implements OidcUser, Serializable {
 
   public OAuthUserInfo(Map<String, Object> attributes) {
     this.attributes = attributes;
+    setAttribute();
+    this.authProvider = getAuthProviderEnum().name();
   }
 
   protected abstract void setAttribute();
