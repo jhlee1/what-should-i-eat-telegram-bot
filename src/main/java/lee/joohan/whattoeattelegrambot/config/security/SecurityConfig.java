@@ -29,27 +29,14 @@ public class SecurityConfig {
   SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity httpSecurity) {
     String[] exceptions = new String[] {"/auth/**", "/login/oauth2/code/google"};
 
-//    erverHttpSecurity
-//                .csrf().disable()
-//                .httpBasic().disable()
-//                .formLogin().disable()
-//                .authorizeExchange()
-//                .pathMatchers("/api/**").authenticated()
-//                .anyExchange().permitAll()
-//                .and().oauth2Login(withDefaults())
-//                .logout()
-//                .and().exceptionHandling()
-//                .accessDeniedHandler((exchange, exception) -> Mono.error(new ApplicationException(ApplicationType.ACCESS_DENIED)))
-//                .and().build()
-//                ;
-
     return httpSecurity
         .cors().disable()
         .csrf().disable()
         .httpBasic().disable()
-        .oauth2Login(Customizer.withDefaults())
+        .authenticationManager(authenticationManager)
+        .securityContextRepository(securityContextRepository)
         .exceptionHandling()
-//        .authenticationEntryPoint((exchange, e) -> Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED)))
+        .authenticationEntryPoint((exchange, e) -> Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED)))
         .accessDeniedHandler((exchange, denied) -> Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))
         .and()
         .authorizeExchange()
@@ -57,9 +44,6 @@ public class SecurityConfig {
         .pathMatchers(HttpMethod.OPTIONS).permitAll()
         .anyExchange().authenticated()
         .and()
-//        .authenticationManager(authenticationManager)
-//        .securityContextRepository(securityContextRepository)
-//        .and()
         .build();
   }
 
