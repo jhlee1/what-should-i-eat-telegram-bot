@@ -3,6 +3,7 @@ package lee.joohan.whattoeattelegrambot.handler.rest;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
+import lee.joohan.whattoeattelegrambot.client.GoogleOAuthClient;
 import lee.joohan.whattoeattelegrambot.config.security.TokenProvider;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.dto.request.LoginRequest;
@@ -31,6 +32,7 @@ public class AuthenticationRestHandler {
   private final UserService userService;
   private final BCryptPasswordEncoder passwordEncoder;
   private final TokenProvider tokenProvider;
+  private final GoogleOAuthClient googleOAuthClient;
 
 
   public Mono<ServerResponse> login(ServerRequest request) {
@@ -53,32 +55,38 @@ public class AuthenticationRestHandler {
   }
 
   public Mono<ServerResponse> signUp(ServerRequest request) {
-    Mono<SignUpRequest> userMono = request.bodyToMono(SignUpRequest.class).cache();
+    Mono<SignUpRequest> signUpRequestMono = request.bodyToMono(SignUpRequest.class).cache();
 
-    return userMono.flatMap(signUpRequest ->
-        userService.findByEmail(Mono.just(signUpRequest.getEmail()))
-            .flatMap(user ->
-                ServerResponse.badRequest()
-                    .body(fromValue(new ErrorResponse("The email[%s] is already registered.", user.getEmail())))
-            ).switchIfEmpty(
-            userMono.flatMap(it -> {
-              User user = User.builder()
-                  .email(it.getEmail())
-                  .password(passwordEncoder.encode(it.getPassword()))
-                  .build();
+    return signUpRequestMono.flatMap(signUpRequest ->
+            googleOAuthClient.getUserInfoProfile(signUpRequest.getToken())
+                .flatMap(stringObjectMap ->
+                        ServerResponse.ok()
+                            .body(fromValue(stringObjectMap))
 
-              return userService.register(user);
-            })
-                .flatMap(user ->
-                    ServerResponse.ok()
-                        .contentType(APPLICATION_JSON)
-                        .body(fromValue(new SignUpResponse(true)))
+
+//        userService.findByEmail(Mono.just(signUpRequest.getEmail()))
+//            .flatMap(user ->
+//                ServerResponse.badRequest()
+//                    .body(fromValue(new ErrorResponse("The email[%s] is already registered.", user.getEmail())))
+//            ).switchIfEmpty(
+//            signUpRequestMono.flatMap(it -> {
+//              User user = User.builder()
+//                  .email(it.getEmail())
+//                  .password(passwordEncoder.encode(it.getPassword()))
+//                  .build();
+//
+//              return userService.register(user);
+//            })
+//                .flatMap(user ->
+//                    ServerResponse.ok()
+//                        .contentType(APPLICATION_JSON)
+//                        .body(fromValue(new SignUpResponse(true)))
+//                )
                 )
-        )
     );
   }
 
   public Mono<ServerResponse> token(ServerRequest serverRequest) {
-      return serverRequest.principal().flatMap(principal -> ServerResponse.ok().bodyValue(principal)).log();
+    return serverRequest.principal().flatMap(principal -> ServerResponse.ok().bodyValue(principal)).log();
   }
 }
