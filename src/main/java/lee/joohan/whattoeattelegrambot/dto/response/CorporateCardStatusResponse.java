@@ -1,5 +1,7 @@
 package lee.joohan.whattoeattelegrambot.dto.response;
 
+import java.util.Optional;
+import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.domain.dao.CorporateCardStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,8 @@ public class CorporateCardStatusResponse {
   public CorporateCardStatusResponse(CorporateCardStatus corporateCardStatus) {
     isBorrowed = corporateCardStatus.isBorrowed();
     cardNum = corporateCardStatus.getCardNum();
-    name = corporateCardStatus.getUserInfo().getFullName();
+    name = Optional.ofNullable(corporateCardStatus.getUserInfo())
+        .map(User::getFullName)
+        .orElse("Deleted user");
   }
 }
