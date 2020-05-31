@@ -50,6 +50,8 @@ public class BotCommandRouter {
         .map(it -> it.split(" ")[0])
         .orElse("");
 
+    //TODO: 작동하는 채팅방 리스트 뽑아서 제한걸기
+
     switch (command) {
       case ADD_RESTAURANT:
         return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
