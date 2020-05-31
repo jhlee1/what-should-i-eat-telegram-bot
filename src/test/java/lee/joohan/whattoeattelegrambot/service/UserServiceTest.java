@@ -20,14 +20,14 @@ class UserServiceTest {
 
   @Test
   void findByEmail() {
-    User user = userService.findByEmail(Mono.just("joolee@ogqcorp.com")).block();
+    User user = userService.findByEmail("joolee@ogqcorp.com").block();
 
     System.out.println("THe user: " + user);
   }
 
   @Test
   void register() {
-    User user = User.builder().email("joolee@ogqcorp.com").password("qwer").build();
+    User user = User.builder().email("joolee@ogqcorp.com").build();
 
     System.out.println(userService.register(user).flatMap(it -> Mono.just("It has value in it")).switchIfEmpty(Mono.just("Empty")).block());
   }

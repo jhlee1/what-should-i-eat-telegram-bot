@@ -33,8 +33,8 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public Mono<User> findByEmail(Mono<String> emailMono) {
-    return emailMono.flatMap(userRepository::findByEmail);
+  public Mono<User> findByEmail(String email) {
+    return userRepository.findByEmail(email);
   }
 
   @Transactional

@@ -1,21 +1,17 @@
 package lee.joohan.whattoeattelegrambot.handler.rest;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.web.reactive.function.BodyInserters.fromValue;
-
 import lee.joohan.whattoeattelegrambot.client.GoogleOAuthClient;
 import lee.joohan.whattoeattelegrambot.config.security.TokenProvider;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.dto.request.LoginRequest;
-import lee.joohan.whattoeattelegrambot.dto.request.SignUpRequest;
 import lee.joohan.whattoeattelegrambot.dto.response.ErrorResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.LoginResponse;
-import lee.joohan.whattoeattelegrambot.dto.response.SignUpResponse;
+import lee.joohan.whattoeattelegrambot.exception.EmailNotVerifiedException;
 import lee.joohan.whattoeattelegrambot.exception.TelegramNotVerifiedException;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -30,62 +26,41 @@ import reactor.core.publisher.Mono;
 @Component
 public class AuthenticationRestHandler {
   private final UserService userService;
-  private final BCryptPasswordEncoder passwordEncoder;
   private final TokenProvider tokenProvider;
   private final GoogleOAuthClient googleOAuthClient;
 
-
   public Mono<ServerResponse> login(ServerRequest request) {
     return request.bodyToMono(LoginRequest.class)
-        .zipWhen(loginRequest -> userService.findByEmail(Mono.just(loginRequest.getEmail())))
-        .flatMap(loginRequestUser -> {
-          if (!loginRequestUser.getT2().isTelegramVerified()) {
-            return Mono.error(TelegramNotVerifiedException.fromUserId(loginRequestUser.getT2().getId()));
-          }
-          return Mono.just(loginRequestUser);
-        })
-        .flatMap(loginRequestAndUser -> {
-          if (passwordEncoder.matches(loginRequestAndUser.getT1().getPassword(), loginRequestAndUser.getT2().getPassword())) { //TODO: Encrypt된 걸로 받기 passwordEncoder.match()
-            return ServerResponse.ok().contentType(APPLICATION_JSON).body(fromValue(new LoginResponse(tokenProvider.generateToken(loginRequestAndUser.getT2()))));
-          } else {
-            return ServerResponse.badRequest().body(fromValue(new ErrorResponse("Invalid credentials")));
-          }
-        }).switchIfEmpty(ServerResponse.badRequest().body(fromValue(new ErrorResponse("User does not exist"))))
-        .onErrorResume(TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())));
-  }
+        .map(LoginRequest::getGoogleAccessToken)
+        .flatMap(googleOAuthClient::getUserInfoProfile)
+        .flatMap(googleOAuthUserInfoResponse ->
+            userService.findByEmail(googleOAuthUserInfoResponse.getEmail())
+                .switchIfEmpty(Mono.defer(() -> {
+                      if (googleOAuthUserInfoResponse.isVerifiedEmail()) {
+                        return userService.register(User.builder()
+                            .firstName(googleOAuthUserInfoResponse.getGivenName())
+                            .lastName(googleOAuthUserInfoResponse.getFamilyName())
+                            .email(googleOAuthUserInfoResponse.getEmail())
+                            .picture(googleOAuthUserInfoResponse.getPicture())
+                            .build());
+                      }
 
-  public Mono<ServerResponse> signUp(ServerRequest request) {
-    Mono<SignUpRequest> signUpRequestMono = request.bodyToMono(SignUpRequest.class).cache();
-
-    return signUpRequestMono.flatMap(signUpRequest ->
-            googleOAuthClient.getUserInfoProfile(signUpRequest.getToken())
-                .flatMap(stringObjectMap ->
-                        ServerResponse.ok()
-                            .body(fromValue(stringObjectMap))
-
-
-//        userService.findByEmail(Mono.just(signUpRequest.getEmail()))
-//            .flatMap(user ->
-//                ServerResponse.badRequest()
-//                    .body(fromValue(new ErrorResponse("The email[%s] is already registered.", user.getEmail())))
-//            ).switchIfEmpty(
-//            signUpRequestMono.flatMap(it -> {
-//              User user = User.builder()
-//                  .email(it.getEmail())
-//                  .password(passwordEncoder.encode(it.getPassword()))
-//                  .build();
-//
-//              return userService.register(user);
-//            })
-//                .flatMap(user ->
-//                    ServerResponse.ok()
-//                        .contentType(APPLICATION_JSON)
-//                        .body(fromValue(new SignUpResponse(true)))
-//                )
+                      return Mono.error(new EmailNotVerifiedException(googleOAuthUserInfoResponse.getEmail()));
+                    })
                 )
-    );
+        )
+        .flatMap(user -> {
+          if (!user.isTelegramVerified()) {
+            return Mono.error(TelegramNotVerifiedException.fromUserId(user.getId()));
+          }
+          return Mono.just(user);
+        })
+        .flatMap(user -> ServerResponse.ok().bodyValue(new LoginResponse(tokenProvider.generateToken(user))))
+        .onErrorResume(TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
+        .onErrorResume(EmailNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())));
   }
 
+  @PreAuthorize("hasRole('ROLE_USER')")
   public Mono<ServerResponse> token(ServerRequest serverRequest) {
     return serverRequest.principal().flatMap(principal -> ServerResponse.ok().bodyValue(principal)).log();
   }

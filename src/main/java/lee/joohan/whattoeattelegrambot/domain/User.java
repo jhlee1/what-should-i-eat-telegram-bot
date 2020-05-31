@@ -24,18 +24,16 @@ public class User {
   private String lastName;
   private String firstName;
   private String email;
-  private String password;
   private List<UserRole> roles;
   private String picture;
   private boolean telegramVerified;
 
   @Builder
-  public User(long telegramId, String lastName, String firstName, String email, String password, String picture) {
+  public User(long telegramId, String lastName, String firstName, String email, String picture) {
     this.telegramId = telegramId;
     this.lastName = lastName;
     this.firstName = firstName;
     this.email = email;
-    this.password = password;
     this.picture = picture;
     this.roles = Arrays.asList(UserRole.ROLE_USER);
   }

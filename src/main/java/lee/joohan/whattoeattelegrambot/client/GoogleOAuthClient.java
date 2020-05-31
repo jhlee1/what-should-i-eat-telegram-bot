@@ -1,9 +1,7 @@
 package lee.joohan.whattoeattelegrambot.client;
 
 
-import java.lang.reflect.ParameterizedType;
-import java.util.Map;
-import org.springframework.core.ParameterizedTypeReference;
+import lee.joohan.whattoeattelegrambot.dto.response.external.GoogleOAuthUserInfoResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -13,15 +11,14 @@ public class GoogleOAuthClient {
   private WebClient webClient;
 
   public GoogleOAuthClient() {
-    webClient = WebClient.create("https://www.googleapis.com/auth");
+    webClient = WebClient.create("https://www.googleapis.com");
   }
 
-  public Mono<Map<String, Object>> getUserInfoProfile(String token) {
+  public Mono<GoogleOAuthUserInfoResponse> getUserInfoProfile(String token) {
     return webClient.get()
-        .uri("/auth/userinfo.profile")
-        .header("Authorization", "Bearer " + token)
+        .uri("oauth2/v2/userinfo")
+        .header("Authorization", String.format("Bearer %s", token))
         .retrieve()
-    .bodyToMono(new ParameterizedTypeReference<>() {});
-
+        .bodyToMono(GoogleOAuthUserInfoResponse.class);
   }
 }
