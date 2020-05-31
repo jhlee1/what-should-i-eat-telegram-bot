@@ -25,13 +25,15 @@ public class WhatShouldIEatBot extends TelegramLongPollingBot {
   @Value("${telegram.bot.key}")
   private String key;
 
-  private final BotCommandHandler botCommandHandler;
+  private final BotCommandRouter botCommandRouter;
 
   @Override
   public void onUpdateReceived(Update update) {
-    String message = botCommandHandler.handle(update.getMessage());
 
-    reply(update.getMessage().getChatId(), message);
+    botCommandRouter.handle(update.getMessage())
+        .doOnNext(s -> reply(update.getMessage().getChatId(), s))
+        .log()
+        .subscribe();
   }
 
   @Override

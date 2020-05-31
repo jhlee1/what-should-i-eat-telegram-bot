@@ -24,10 +24,10 @@ public class Restaurant {
   private ObjectId id;
 
   private String name;
-  private String address;
+  private String address; //TODO: Geospatial로 바꾸기
   private List<Review> reviews;
   private List<Menu> menus;
-  private User creator;
+  private ObjectId creatorId;
 
   @CreatedDate
   private LocalDateTime createdAt;
@@ -36,12 +36,13 @@ public class Restaurant {
 
 
   @Builder
-  public Restaurant(String name, String address, User creator) {
+  public Restaurant(String name, String address, ObjectId creatorId) {
     this.name = name;
     this.address = address;
-    this.creator = creator;
+    this.creatorId = creatorId;
+
     reviews = new ArrayList<>();
-    this.menus = new ArrayList<>();
+    menus = new ArrayList<>();
   }
 
   public void addMenu(Menu menu) {

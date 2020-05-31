@@ -2,6 +2,7 @@ package lee.joohan.whattoeattelegrambot.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
@@ -29,6 +30,11 @@ public class Cafe {
 
   private String name;
   private List<Menu> menus;
-  private User creator;
+  private ObjectId creatorId;
 
+  @Builder
+  public Cafe(String name, ObjectId creatorId) {
+    this.name = name;
+    this.creatorId = creatorId;
+  }
 }

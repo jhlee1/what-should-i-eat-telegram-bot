@@ -3,6 +3,7 @@ package lee.joohan.whattoeattelegrambot.exception;
 /**
  * Created by Joohan Lee on 2020/02/16
  */
+
 public class NotFoundRestaurantException extends RuntimeException {
 
   private NotFoundRestaurantException(String message) {
@@ -11,5 +12,9 @@ public class NotFoundRestaurantException extends RuntimeException {
 
   public static NotFoundRestaurantException fromName(String name) {
     return new NotFoundRestaurantException(String.format("The restaurant with name[%s] does not exist.", name));
+  }
+
+  public static NotFoundRestaurantException noParam() {
+    return new NotFoundRestaurantException("The restaurant does not exist.");
   }
 }

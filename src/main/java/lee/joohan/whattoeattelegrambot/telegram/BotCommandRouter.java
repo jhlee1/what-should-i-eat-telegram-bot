@@ -12,20 +12,22 @@ import static lee.joohan.whattoeattelegrambot.common.BotCommand.NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RANDOM_PICK;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RETURN_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.USE_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.VERIFY_ACCOUNT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 
 import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.common.BotCommand;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.config.HandleException;
-import lee.joohan.whattoeattelegrambot.facade.CafeBotCommandFacade;
-import lee.joohan.whattoeattelegrambot.facade.CorporateCardBotCommandFacade;
-import lee.joohan.whattoeattelegrambot.facade.RestaurantBotCommandFacade;
+import lee.joohan.whattoeattelegrambot.handler.bot.CafeBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.CorporateCardBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.RestaurantBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.UserBotCommandHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Joohan Lee on 2020/02/16
@@ -34,51 +36,56 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class BotCommandHandler {
-  private final RestaurantBotCommandFacade restaurantBotCommandFacade;
-  private final CafeBotCommandFacade cafeBotCommandFacade;
-  private final CorporateCardBotCommandFacade corporateCardBotCommandFacade;
+public class BotCommandRouter {
+  private final RestaurantBotCommandHandler restaurantBotCommandHandler;
+  private final CafeBotCommandHandler cafeBotCommandHandler;
+  private final CorporateCardBotCommandHandler corporateCardBotCommandHandler;
+  private final UserBotCommandHandler userBotCommandHandler;
 
-  @Transactional
+
   @HandleException
-  public String handle(Message message) {
+  public Mono<String> handle(Message message) {
     log.info("Received message: {}", message);
     String command = Optional.ofNullable(message.getText())
         .map(it -> it.split(" ")[0])
         .orElse("");
 
+    //TODO: 작동하는 채팅방 리스트 뽑아서 제한걸기
+
     switch (command) {
       case ADD_RESTAURANT:
-        return restaurantBotCommandFacade.addRestaurant(message);
+        return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
       case EDIT_NAME_RESTAURANT:
-        return restaurantBotCommandFacade.changeRestaurantName(message);
+        return restaurantBotCommandHandler.changeRestaurantName(Mono.fromSupplier(() -> message));
       case DELETE_RESTAURANT:
-          return restaurantBotCommandFacade.deleteRestaurant(message);
+        return restaurantBotCommandHandler.deleteRestaurant(Mono.fromSupplier(() -> message));
       case LIST_RESTAURANT:
-        return restaurantBotCommandFacade.listRestaurant();
+        return restaurantBotCommandHandler.listRestaurant();
       case RANDOM_PICK:
 //        if (message.getChat().getId() == -310678804) {
-//            return "삼식이";
+//            return Mono.just("탕수육");
 //        }
-        return restaurantBotCommandFacade.randomPickRestaurant(message);
+        return restaurantBotCommandHandler.randomPickRestaurant(Mono.fromSupplier(() -> message));
       case LIST_COMMANDS:
-          return restaurantBotCommandFacade.listCommands();
+        return restaurantBotCommandHandler.listCommands();
       case NOT_EAT:
-        return DO_NOT_EAT;
+        return Mono.just(DO_NOT_EAT);
       case ADD_CAFE:
-        return cafeBotCommandFacade.addCafe(message);
+        return cafeBotCommandHandler.addCafe(Mono.just(message));
       case USE_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandFacade.useCard(message);
+        return corporateCardBotCommandHandler.useCard(Mono.just(message));
       case RETURN_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandFacade.putBackCard(message);
+        return corporateCardBotCommandHandler.putBackCard(Mono.just(message));
       case LIST_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandFacade.listCards();
+        return corporateCardBotCommandHandler.listCards();
       case EAT_OR_NOT:
-        return restaurantBotCommandFacade.eatOrNot(message);
+        return restaurantBotCommandHandler.eatOrNot(Mono.just(message));
+      case VERIFY_ACCOUNT:
+        return userBotCommandHandler.verify(Mono.just(message));
       case BotCommand.EMPTY:
         return null;
       default:
-        return ResponseMessage.NO_COMMAND_FOUND_ERROR_RESPONSE;
+        return Mono.just(ResponseMessage.NO_COMMAND_FOUND_ERROR_RESPONSE);
     }
   }
 }
