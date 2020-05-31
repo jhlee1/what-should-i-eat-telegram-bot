@@ -3,12 +3,12 @@ package lee.joohan.whattoeattelegrambot.handler.bot;
 import java.util.regex.Pattern;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.domain.User;
+import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.service.CafeService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import reactor.core.publisher.Mono;
 
 /**
@@ -23,11 +23,10 @@ public class CafeBotCommandHandler {
   private final CafeService cafeService;
 
   @Transactional
-  public Mono<String> addCafe(Mono<Message> messageMono) {
+  public Mono<String> addCafe(Mono<TelegramMessage> messageMono) {
     return messageMono
-        .filter(message -> !Pattern.matches("/\\S+ \\S+", message.getText()))
-        .<Message>flatMap(message -> Mono.error(new IllegalArgumentException()))
-        .switchIfEmpty(messageMono)
+        .filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
+        .switchIfEmpty(Mono.error(new IllegalArgumentException()))
         .flatMap(
             message -> userService.getOrRegister(Mono.just(User.builder()
                 .firstName(message.getFrom().getFirstName())
@@ -36,7 +35,7 @@ public class CafeBotCommandHandler {
                 .build())))
         .zipWith(
             messageMono
-                .map(Message::getText)
+                .map(TelegramMessage::getText)
                 .map(s -> s.split(" ")[1])
         )
         .flatMap(objects -> cafeService.register(Mono.just(objects)))

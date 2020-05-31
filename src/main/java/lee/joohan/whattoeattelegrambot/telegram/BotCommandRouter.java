@@ -22,6 +22,7 @@ import lee.joohan.whattoeattelegrambot.config.HandleException;
 import lee.joohan.whattoeattelegrambot.handler.bot.CafeBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.CorporateCardBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.RestaurantBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.TelegramMessageBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.UserBotCommandHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,51 +42,59 @@ public class BotCommandRouter {
   private final CafeBotCommandHandler cafeBotCommandHandler;
   private final CorporateCardBotCommandHandler corporateCardBotCommandHandler;
   private final UserBotCommandHandler userBotCommandHandler;
+  private final TelegramMessageBotCommandHandler telegramMessageBotCommandHandler;
 
 
   @HandleException
-  public Mono<String> handle(Message message) {
-    log.info("Received message: {}", message);
-    String command = Optional.ofNullable(message.getText())
-        .map(it -> it.split(" ")[0])
-        .orElse("");
+  public Mono<String> handle(Mono<Message> messageMono) {
+    return messageMono
+        .flatMap(telegramMessageBotCommandHandler::create)
+        .flatMap(
+        message -> {
+          String command = Optional.ofNullable(message.getText())
+              .map(it -> it.split(" ")[0])
+              .orElse("");
 
-    //TODO: 작동하는 채팅방 리스트 뽑아서 제한걸기
+          //TODO: 작동하는 채팅방 리스트 뽑아서 제한걸기
 
-    switch (command) {
-      case ADD_RESTAURANT:
-        return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
-      case EDIT_NAME_RESTAURANT:
-        return restaurantBotCommandHandler.changeRestaurantName(Mono.fromSupplier(() -> message));
-      case DELETE_RESTAURANT:
-        return restaurantBotCommandHandler.deleteRestaurant(Mono.fromSupplier(() -> message));
-      case LIST_RESTAURANT:
-        return restaurantBotCommandHandler.listRestaurant();
-      case RANDOM_PICK:
+          switch (command) {
+            case ADD_RESTAURANT:
+              return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
+            case EDIT_NAME_RESTAURANT:
+              return restaurantBotCommandHandler
+                  .changeRestaurantName(Mono.fromSupplier(() -> message));
+            case DELETE_RESTAURANT:
+              return restaurantBotCommandHandler.deleteRestaurant(Mono.fromSupplier(() -> message));
+            case LIST_RESTAURANT:
+              return restaurantBotCommandHandler.listRestaurant();
+            case RANDOM_PICK:
 //        if (message.getChat().getId() == -310678804) {
 //            return Mono.just("탕수육");
 //        }
-        return restaurantBotCommandHandler.randomPickRestaurant(Mono.fromSupplier(() -> message));
-      case LIST_COMMANDS:
-        return restaurantBotCommandHandler.listCommands();
-      case NOT_EAT:
-        return Mono.just(DO_NOT_EAT);
-      case ADD_CAFE:
-        return cafeBotCommandHandler.addCafe(Mono.just(message));
-      case USE_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandHandler.useCard(Mono.just(message));
-      case RETURN_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandHandler.putBackCard(Mono.just(message));
-      case LIST_CORPORATE_CREDIT_CARD:
-        return corporateCardBotCommandHandler.listCards();
-      case EAT_OR_NOT:
-        return restaurantBotCommandHandler.eatOrNot(Mono.just(message));
-      case VERIFY_ACCOUNT:
-        return userBotCommandHandler.verify(Mono.just(message));
-      case BotCommand.EMPTY:
-        return null;
-      default:
-        return Mono.just(ResponseMessage.NO_COMMAND_FOUND_ERROR_RESPONSE);
-    }
+              return restaurantBotCommandHandler
+                  .randomPickRestaurant(Mono.fromSupplier(() -> message));
+            case LIST_COMMANDS:
+              return restaurantBotCommandHandler.listCommands();
+            case NOT_EAT:
+              return Mono.just(DO_NOT_EAT);
+            case ADD_CAFE:
+              return cafeBotCommandHandler.addCafe(Mono.just(message));
+            case USE_CORPORATE_CREDIT_CARD:
+              return corporateCardBotCommandHandler.useCard(Mono.just(message));
+            case RETURN_CORPORATE_CREDIT_CARD:
+              return corporateCardBotCommandHandler.putBackCard(Mono.just(message));
+            case LIST_CORPORATE_CREDIT_CARD:
+              return corporateCardBotCommandHandler.listCards();
+            case EAT_OR_NOT:
+              return restaurantBotCommandHandler.eatOrNot(Mono.just(message));
+            case VERIFY_ACCOUNT:
+              return userBotCommandHandler.verify(Mono.just(message));
+            case BotCommand.EMPTY:
+              return Mono.empty();
+            default:
+              return Mono.just(ResponseMessage.NO_COMMAND_FOUND_ERROR_RESPONSE);
+          }
+        }
+    );
   }
 }

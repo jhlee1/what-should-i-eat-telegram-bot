@@ -11,13 +11,12 @@ import lee.joohan.whattoeattelegrambot.common.BotCommand;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.domain.Restaurant;
 import lee.joohan.whattoeattelegrambot.domain.User;
+import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.service.RestaurantService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
@@ -28,17 +27,15 @@ import reactor.util.function.Tuples;
 
 @RequiredArgsConstructor
 @Component
-@Slf4j
 public class RestaurantBotCommandHandler {
   private final RestaurantService restaurantService;
   private final UserService userService;
   private final static Random random = new Random();
 
   @Transactional
-  public Mono<String> addRestaurant(Mono<Message> messageMono) {
-    return messageMono.filter(message -> !Pattern.matches("/\\S+ \\S+", message.getText()))
-        .<Message>flatMap(message -> Mono.error(new IllegalArgumentException()))
-        .switchIfEmpty(messageMono)
+  public Mono<String> addRestaurant(Mono<TelegramMessage> messageMono) {
+    return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
+        .switchIfEmpty(Mono.error(new IllegalArgumentException()))
         .flatMap(message -> userService.getOrRegister(Mono.just(User.builder()
                 .firstName(message.getFrom().getFirstName())
                 .lastName(message.getFrom().getLastName())
@@ -48,7 +45,7 @@ public class RestaurantBotCommandHandler {
             )
             .map(User::getId)
         )
-        .zipWith(messageMono.map(Message::getText).map(s -> s.split(" ")[1]))
+        .zipWith(messageMono.map(TelegramMessage::getText).map(s -> s.split(" ")[1]))
         .flatMap(objects -> restaurantService.registerFromTelegram(Mono.just(objects)))
         .then(Mono.just(ResponseMessage.REGISTER_RESTAURANT_RESPONSE))
         .onErrorReturn(ResponseMessage.REGISTER_RESTAURANT_ARGS_ERROR_RESPONSE);
@@ -83,7 +80,7 @@ public class RestaurantBotCommandHandler {
 //        .collect(Collectors.joining("\n"));
 //  }
 
-  public Mono<String> randomPickRestaurant(Mono<Message> messageMono) {
+  public Mono<String> randomPickRestaurant(Mono<TelegramMessage> messageMono) {
     return messageMono.map(message -> message.getText().split(" "))
         .map(input -> input.length > 1 ? Integer.parseInt(input[1]) : 1)
         .flatMap(num ->
@@ -107,7 +104,7 @@ public class RestaurantBotCommandHandler {
         .collect(Collectors.joining(",\n"));
   }
 
-  public Mono<String> changeRestaurantName(Mono<Message> messageMono) {
+  public Mono<String> changeRestaurantName(Mono<TelegramMessage> messageMono) {
     return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+ \\S+", message.getText()))
         .switchIfEmpty(Mono.error(new IllegalArgumentException()))
         .map(message -> {
@@ -127,7 +124,7 @@ public class RestaurantBotCommandHandler {
         .onErrorReturn(ResponseMessage.CHANGE_RESTAURANT_NAME_ARGS_ERROR_RESPONSE);
   }
 
-  public Mono<String> deleteRestaurant(Mono<Message> messageMono) {
+  public Mono<String> deleteRestaurant(Mono<TelegramMessage> messageMono) {
     return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
         .switchIfEmpty(Mono.error(new IllegalArgumentException()))
         .map(message -> Mono.just(message.getText().split(" ")[1]))
@@ -143,7 +140,6 @@ public class RestaurantBotCommandHandler {
               try {
                 return field.get(String.class);
               } catch (IllegalAccessException e) {
-                log.error("Failed to get commands.", e);
                 return "";
               }
             })
@@ -153,7 +149,7 @@ public class RestaurantBotCommandHandler {
     );
   }
 
-  public Mono<String> eatOrNot(Mono<Message> messageMono) {
+  public Mono<String> eatOrNot(Mono<TelegramMessage> messageMono) {
     return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
         .<String>then(
             Mono.create(monoSink -> {

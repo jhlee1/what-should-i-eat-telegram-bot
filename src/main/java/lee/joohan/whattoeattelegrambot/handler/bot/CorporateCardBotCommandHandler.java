@@ -11,6 +11,7 @@ import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.USE_CORPORA
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.domain.User;
+import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyInUseException;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyReturnedException;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
@@ -18,7 +19,6 @@ import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import reactor.core.publisher.Mono;
 
 /**
@@ -31,7 +31,7 @@ public class CorporateCardBotCommandHandler {
   private final CorporateCardService corporateCardService;
   private final UserService userService;
 
-  public Mono<String> useCard(Mono<Message> messageMono) {
+  public Mono<String> useCard(Mono<TelegramMessage> messageMono) {
     return messageMono
         .filter(message -> Pattern.matches("/\\S+ \\d+", message.getText()))
         .switchIfEmpty(Mono.error(IllegalArgumentException::new))
@@ -51,7 +51,7 @@ public class CorporateCardBotCommandHandler {
         .onErrorReturn(CorporateCardAlreadyInUseException.class, CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE);
   }
 
-  public Mono<String> putBackCard(Mono<Message> messageMono) {
+  public Mono<String> putBackCard(Mono<TelegramMessage> messageMono) {
     return messageMono
         .filter(message -> Pattern.matches("/\\S+ \\d+", message.getText()))
         .switchIfEmpty(

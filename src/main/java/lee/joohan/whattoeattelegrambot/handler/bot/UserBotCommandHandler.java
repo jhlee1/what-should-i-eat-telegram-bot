@@ -2,6 +2,7 @@ package lee.joohan.whattoeattelegrambot.handler.bot;
 
 import java.util.regex.Pattern;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
+import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyVerifiedEmailException;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyVerifiedTelegramIdException;
 import lee.joohan.whattoeattelegrambot.exception.NotFoundUserException;
@@ -9,7 +10,6 @@ import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 public class UserBotCommandHandler {
   private final UserService userService;
 
-  public Mono<String> verify(Mono<Message> messageMono) {
+  public Mono<String> verify(Mono<TelegramMessage> messageMono) {
     return messageMono
         .filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
         .switchIfEmpty(Mono.error(IllegalArgumentException::new))
