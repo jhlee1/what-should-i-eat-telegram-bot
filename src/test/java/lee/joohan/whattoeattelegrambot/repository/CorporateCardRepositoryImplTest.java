@@ -13,9 +13,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 class CorporateCardRepositoryImplTest {
-
   @Autowired
   CorporateCardRepository corporateCardRepository;
+
   @Test
   void findCardStatuses() {
     System.out.println(corporateCardRepository.findCardStatuses());

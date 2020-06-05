@@ -46,7 +46,7 @@ public class RestaurantBotCommandHandler {
             .map(User::getId)
         )
         .zipWith(messageMono.map(TelegramMessage::getText).map(s -> s.split(" ")[1]))
-        .flatMap(objects -> restaurantService.registerFromTelegram(Mono.just(objects)))
+        .flatMap(objects -> restaurantService.registerFromTelegram(objects.getT1(), objects.getT2()))
         .then(Mono.just(ResponseMessage.REGISTER_RESTAURANT_RESPONSE))
         .onErrorReturn(ResponseMessage.REGISTER_RESTAURANT_ARGS_ERROR_RESPONSE);
   }
@@ -127,7 +127,7 @@ public class RestaurantBotCommandHandler {
   public Mono<String> deleteRestaurant(Mono<TelegramMessage> messageMono) {
     return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
         .switchIfEmpty(Mono.error(new IllegalArgumentException()))
-        .map(message -> Mono.just(message.getText().split(" ")[1]))
+        .map(message -> message.getText().split(" ")[1])
         .flatMap(restaurantService::deleteRestaurant)
         .then(Mono.just(ResponseMessage.DELETE_RESTAURANT_RESPONSE))
         .onErrorReturn(IllegalArgumentException.class, ResponseMessage.DELETE_RESTAURANT_RESPONSE);

@@ -7,6 +7,7 @@ import lee.joohan.whattoeattelegrambot.dto.request.LoginRequest;
 import lee.joohan.whattoeattelegrambot.dto.response.ErrorResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.LoginResponse;
 import lee.joohan.whattoeattelegrambot.exception.EmailNotVerifiedException;
+import lee.joohan.whattoeattelegrambot.exception.NotValidEmailException;
 import lee.joohan.whattoeattelegrambot.exception.TelegramNotVerifiedException;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -36,16 +37,21 @@ public class AuthenticationRestHandler {
         .flatMap(googleOAuthUserInfoResponse ->
             userService.findByEmail(googleOAuthUserInfoResponse.getEmail())
                 .switchIfEmpty(Mono.defer(() -> {
-                      if (googleOAuthUserInfoResponse.isVerifiedEmail()) {
-                        return userService.register(User.builder()
-                            .firstName(googleOAuthUserInfoResponse.getGivenName())
-                            .lastName(googleOAuthUserInfoResponse.getFamilyName())
-                            .email(googleOAuthUserInfoResponse.getEmail())
-                            .picture(googleOAuthUserInfoResponse.getPicture())
-                            .build());
+                      if (!googleOAuthUserInfoResponse.getEmail().matches(".*@ogqcorp.com")) {
+                        return Mono.error(new EmailNotVerifiedException(googleOAuthUserInfoResponse.getEmail()));
                       }
 
-                      return Mono.error(new EmailNotVerifiedException(googleOAuthUserInfoResponse.getEmail()));
+                      if (!googleOAuthUserInfoResponse.isVerifiedEmail()) {
+                        return Mono.error(new EmailNotVerifiedException(googleOAuthUserInfoResponse.getEmail()));
+                      }
+
+                      return userService.register(User.builder()
+                          .firstName(googleOAuthUserInfoResponse.getGivenName())
+                          .lastName(googleOAuthUserInfoResponse.getFamilyName())
+                          .email(googleOAuthUserInfoResponse.getEmail())
+                          .picture(googleOAuthUserInfoResponse.getPicture())
+                          .build());
+
                     })
                 )
         )
@@ -55,9 +61,10 @@ public class AuthenticationRestHandler {
           }
           return Mono.just(user);
         })
-        .flatMap(user -> ServerResponse.ok().bodyValue(new LoginResponse(tokenProvider.generateToken(user))))
+        .flatMap(user -> ServerResponse.ok().bodyValue(new LoginResponse(tokenProvider.generateToken(user), user.isAdmin())))
         .onErrorResume(TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
-        .onErrorResume(EmailNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())));
+        .onErrorResume(EmailNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
+        .onErrorResume(NotValidEmailException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())));
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")

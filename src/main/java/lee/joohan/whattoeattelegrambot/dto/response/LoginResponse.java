@@ -1,6 +1,5 @@
 package lee.joohan.whattoeattelegrambot.dto.response;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,8 +11,10 @@ import lombok.NoArgsConstructor;
 @Getter
 public class LoginResponse {
   private String token;
+  private boolean admin;
 
-  public LoginResponse(String token) {
+  public LoginResponse(String token, boolean isAdmin) {
     this.token = token;
+    admin = isAdmin;
   }
 }
