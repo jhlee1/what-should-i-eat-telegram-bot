@@ -50,6 +50,11 @@ public class RestaurantService {
   }
 
   @Transactional(readOnly = true)
+  public Flux<Restaurant> randomSample(int num) {
+    return restaurantRepository.getRandomSample(num);
+  }
+
+  @Transactional(readOnly = true)
   public Flux<Restaurant> getAll() {
     return restaurantRepository.findAll();
   }

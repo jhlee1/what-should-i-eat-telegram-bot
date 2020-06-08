@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
  */
 
 @Repository
-public interface RestaurantRepository extends ReactiveMongoRepository<Restaurant, ObjectId> {
+public interface RestaurantRepository extends ReactiveMongoRepository<Restaurant, ObjectId>, RestaurantRepositoryCustom {
   Mono<Restaurant> findByName(String name);
   Flux<Restaurant> findAllByOrderById(Pageable pageable);
 }

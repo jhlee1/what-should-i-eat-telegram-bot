@@ -43,7 +43,7 @@ public class RestaurantBotCommandHandler {
                 .build()
             )
             )
-            .map(User::getId)
+                .map(User::getId)
         )
         .zipWith(messageMono.map(TelegramMessage::getText).map(s -> s.split(" ")[1]))
         .flatMap(objects -> restaurantService.registerFromTelegram(objects.getT1(), objects.getT2()))
@@ -84,14 +84,9 @@ public class RestaurantBotCommandHandler {
     return messageMono.map(message -> message.getText().split(" "))
         .map(input -> input.length > 1 ? Integer.parseInt(input[1]) : 1)
         .flatMap(num ->
-            restaurantService.getAll()
-                .collectList()
-                .map(restaurants ->
-                    random.ints(num, 0, restaurants.size())
-                        .mapToObj(restaurants::get)
-                        .map(Restaurant::getName)
-                        .collect(Collectors.joining(",\n"))
-                )
+            restaurantService.randomSample(num)
+                .map(Restaurant::getName)
+                .collect(Collectors.joining(",\n"))
         )
         .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
         .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
