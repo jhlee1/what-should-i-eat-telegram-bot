@@ -3,7 +3,10 @@ package lee.joohan.whattoeattelegrambot.handler.bot;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.EAT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.RANDOM_PICK_ARGS_ERROR_RESPONSE;
+import static reactor.core.scheduler.Schedulers.elastic;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -81,20 +84,17 @@ public class RestaurantBotCommandHandler {
 //  }
 
   public Mono<String> randomPickRestaurant(Mono<TelegramMessage> messageMono) {
-    return messageMono.map(message -> message.getText().split(" "))
-        .map(input -> input.length > 1 ? Integer.parseInt(input[1]) : 1)
-        .flatMap(num ->
-            restaurantService.getAll()
-                .collectList()
-                .map(restaurants ->
-                    random.ints(num, 0, restaurants.size())
-                        .mapToObj(restaurants::get)
-                        .map(Restaurant::getName)
-                        .collect(Collectors.joining(",\n"))
-                )
-        )
-        .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
-        .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
+    Mono<Integer> size = Mono.fromCallable(()->{
+      return Integer.parseInt(messageMono.block().getText().split(" ")[1]);
+    }).subscribeOn(elastic()).onErrorReturn(0);
+    return shuffle(restaurantService.getAll().collectList()).map(l->
+        l.subList(0, size.block()).stream().map(Restaurant::getName).collect(Collectors.joining(",\n"))
+    ).onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
+  }
+
+  private Mono<List<Restaurant>> shuffle(Mono<List<Restaurant>> c){
+    return c.map(l->{
+      Collections.shuffle(l);return l;});
   }
 
   public Mono<String> listRestaurant() {
