@@ -10,6 +10,6 @@ import reactor.core.publisher.Mono;
  */
 public interface CafeRepository extends ReactiveMongoRepository<Cafe, ObjectId> {
 
-  Mono<Cafe> findByName(Mono<String> name);
+  Mono<Cafe> findByName(String name);
 
 }
