@@ -6,8 +6,9 @@ import lee.joohan.whattoeattelegrambot.exception.AlreadyExistCafeException;
 import lee.joohan.whattoeattelegrambot.repository.CafeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 /**
  * Created by Joohan Lee on 2020/04/27
@@ -19,18 +20,21 @@ import reactor.util.function.Tuple2;
 public class CafeService {
   private final CafeRepository cafeRepository;
 
-  public Mono<Cafe> register(Mono<Tuple2<User, String>> userCafeNameTuple) {
-    return cafeRepository.findByName(userCafeNameTuple.map(Tuple2::getT2))
+  @Transactional
+  public Mono<Cafe> register(User user, String cafeName) {
+    return cafeRepository.findByName(cafeName)
         .<Cafe>flatMap(cafe -> Mono.error(AlreadyExistCafeException.fromName(cafe.getName())))
         .switchIfEmpty(
-            userCafeNameTuple.flatMap(it ->
-                cafeRepository.save(
-                    Cafe.builder()
-                        .name(it.getT2())
-                        .creatorId(it.getT1().getId())
-                        .build()
-                )
+            cafeRepository.save(
+                Cafe.builder()
+                    .name(cafeName)
+                    .creatorId(user.getId())
+                    .build()
             )
         );
+  }
+
+  public Flux<Cafe> getAll() {
+    return cafeRepository.findAll();
   }
 }

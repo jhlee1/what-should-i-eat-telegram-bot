@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * Created by Joohan Lee on 2020/03/12
  */
 
-@Document("restaurant")
+@Document("cafe")
 @Getter
 @NoArgsConstructor
 public class Cafe {
