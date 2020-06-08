@@ -8,6 +8,9 @@ import lee.joohan.whattoeattelegrambot.exception.NotFoundRestaurantException;
 import lee.joohan.whattoeattelegrambot.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -23,30 +26,28 @@ import reactor.util.function.Tuple2;
 public class RestaurantService {
   private final RestaurantRepository restaurantRepository;
 
-  public Mono<Restaurant> registerFromTelegram(Mono<Tuple2<ObjectId,String>> userIdRestaurantNameMono) {
-    return restaurantRepository.findByName(userIdRestaurantNameMono.map(Tuple2::getT2))
+  public Mono<Restaurant> registerFromTelegram(ObjectId userId, String restaurantName) {
+    return restaurantRepository.findByName(restaurantName)
         .<Restaurant>flatMap(restaurant -> Mono.error(AlreadyExistRestaurantException.fromName(restaurant.getName())))
-        .switchIfEmpty(userIdRestaurantNameMono.flatMap(it ->
-                restaurantRepository.save(
-                    Restaurant.builder()
-                        .name(it.getT2())
-                        .creatorId(it.getT1())
-                        .build()
-                )
+        .switchIfEmpty(
+            restaurantRepository.save(
+                Restaurant.builder()
+                    .name(restaurantName)
+                    .creatorId(userId)
+                    .build()
             )
         );
   }
 
-  public Mono<Restaurant> registerFromRequest(Mono<Tuple2<ObjectId, RegisterRestaurantRequest>> userIdRestaurantRequestMono) {
-    return restaurantRepository.findByName(userIdRestaurantRequestMono.map(Tuple2::getT2).map(RegisterRestaurantRequest::getName))
-            .switchIfEmpty(userIdRestaurantRequestMono.flatMap(tmp -> restaurantRepository.save(Restaurant.builder()
-            .name(tmp.getT2().getName())
-            .creatorId(tmp.getT1())
-            .address(tmp.getT2().getAddress())
-            .build())))
-        .<Restaurant>flatMap(restaurant -> Mono.error(AlreadyExistRestaurantException.fromName(restaurant.getName())));
+  public Mono<Restaurant> registerFromRequest(ObjectId userId ,RegisterRestaurantRequest restaurantRequest) {
+    return restaurantRepository.findByName(restaurantRequest.getName())
+        .switchIfEmpty(restaurantRepository.save(Restaurant.builder()
+            .name(restaurantRequest.getName())
+            .creatorId(userId)
+            .address(restaurantRequest.getAddress())
+            .build()))
+        .flatMap(restaurant -> Mono.error(AlreadyExistRestaurantException.fromName(restaurant.getName())));
   }
-
 
   @Transactional(readOnly = true)
   public Flux<Restaurant> getAll() {
@@ -54,13 +55,18 @@ public class RestaurantService {
   }
 
   @Transactional(readOnly = true)
-  public Mono<Restaurant> get(Mono<String> name) {
+  public Flux<Restaurant> getAll(int page, int pageSize) {
+    return restaurantRepository.findAllByOrderById(PageRequest.of(page, pageSize, Sort.by(Direction.DESC, "id")));
+  }
+
+  @Transactional(readOnly = true)
+  public Mono<Restaurant> get(String name) {
     return restaurantRepository.findByName(name);
   }
 
   @Transactional
   public Mono<Restaurant> changeName(Mono<Tuple2<Tuple2<String,String>,User>> fromToUpdater) {
-    return fromToUpdater.flatMap(objects -> restaurantRepository.findByName(Mono.just(objects.getT1().getT1())))
+    return fromToUpdater.flatMap(objects -> restaurantRepository.findByName(objects.getT1().getT1()))
         .switchIfEmpty(Mono.error(NotFoundRestaurantException.noParam()))
         .zipWith(fromToUpdater.map(objects -> objects.getT1().getT2()))
         .doOnNext(restaurant -> restaurant.getT1().changeName(restaurant.getT2()))
@@ -69,9 +75,9 @@ public class RestaurantService {
   }
 
   @Transactional
-  public Mono<Void> deleteRestaurant(Mono<String> name) {
+  public Mono<Void> deleteRestaurant(String name) {
     return restaurantRepository.findByName(name)
-        .switchIfEmpty(Mono.error(NotFoundRestaurantException.fromName(name.block())))
+        .switchIfEmpty(Mono.error(NotFoundRestaurantException.fromName(name)))
         .flatMap(restaurantRepository::delete);
   }
 }

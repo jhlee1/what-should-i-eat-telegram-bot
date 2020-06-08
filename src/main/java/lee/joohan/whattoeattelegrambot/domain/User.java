@@ -51,4 +51,9 @@ public class User {
     this.firstName = firstName;
     telegramVerified = true;
   }
+
+  public boolean isAdmin() {
+    return roles.stream()
+        .anyMatch(UserRole.ROLE_ADMIN::equals);
+  }
 }

@@ -2,8 +2,10 @@ package lee.joohan.whattoeattelegrambot.repository;
 
 import lee.joohan.whattoeattelegrambot.domain.Restaurant;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -12,5 +14,6 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface RestaurantRepository extends ReactiveMongoRepository<Restaurant, ObjectId> {
-  Mono<Restaurant> findByName(Mono<String> name);
+  Mono<Restaurant> findByName(String name);
+  Flux<Restaurant> findAllByOrderById(Pageable pageable);
 }
