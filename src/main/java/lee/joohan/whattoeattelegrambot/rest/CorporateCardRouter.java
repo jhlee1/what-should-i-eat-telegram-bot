@@ -1,5 +1,7 @@
 package lee.joohan.whattoeattelegrambot.rest;
 
+import static lee.joohan.whattoeattelegrambot.common.ErrorCode.NOT_BORROWED_ANY_CARD;
+
 import lee.joohan.whattoeattelegrambot.dto.response.ErrorResponse;
 import lee.joohan.whattoeattelegrambot.dto.response.PutBackCorporateCardResponse;
 import lee.joohan.whattoeattelegrambot.handler.rest.CorporateCardRestHandler;
@@ -27,7 +29,7 @@ public class CorporateCardRouter {
         .PUT("/corporateCards/putBack", request ->
             ServerResponse.ok()
                 .body(corporateCardRestHandler.putBack(request), PutBackCorporateCardResponse.class)
-                .doOnError(error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
+                .doOnError(error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(NOT_BORROWED_ANY_CARD, error.getMessage())))
         )
         .build();
   }

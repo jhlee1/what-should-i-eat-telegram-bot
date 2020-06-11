@@ -8,9 +8,11 @@ import lombok.Getter;
 
 @Getter
 public class ErrorResponse {
+  private int code;
   private String message;
 
-  public ErrorResponse(String message, Object... params) {
+  public ErrorResponse(int errorCode, String message, Object... params) {
+    code = errorCode;
     this.message = String.format(message, params);
   }
 }
