@@ -1,5 +1,9 @@
 package lee.joohan.whattoeattelegrambot.handler.rest;
 
+import static lee.joohan.whattoeattelegrambot.common.ErrorCode.EMAIL_NOT_VERIFIED;
+import static lee.joohan.whattoeattelegrambot.common.ErrorCode.NOT_VALID_EMAIL;
+import static lee.joohan.whattoeattelegrambot.common.ErrorCode.TELEGRAM_NOT_VERIFIED;
+
 import lee.joohan.whattoeattelegrambot.client.GoogleOAuthClient;
 import lee.joohan.whattoeattelegrambot.config.security.TokenProvider;
 import lee.joohan.whattoeattelegrambot.domain.User;
@@ -38,7 +42,7 @@ public class AuthenticationRestHandler {
             userService.findByEmail(googleOAuthUserInfoResponse.getEmail())
                 .switchIfEmpty(Mono.defer(() -> {
                       if (!googleOAuthUserInfoResponse.getEmail().matches(".*@ogqcorp.com")) {
-                        return Mono.error(new EmailNotVerifiedException(googleOAuthUserInfoResponse.getEmail()));
+                        return Mono.error(new NotValidEmailException(googleOAuthUserInfoResponse.getEmail()));
                       }
 
                       if (!googleOAuthUserInfoResponse.isVerifiedEmail()) {
@@ -62,9 +66,9 @@ public class AuthenticationRestHandler {
           return Mono.just(user);
         })
         .flatMap(user -> ServerResponse.ok().bodyValue(new LoginResponse(tokenProvider.generateToken(user), user.isAdmin())))
-        .onErrorResume(TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
-        .onErrorResume(EmailNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
-        .onErrorResume(NotValidEmailException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())));
+        .onErrorResume(TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(TELEGRAM_NOT_VERIFIED, error.getMessage())))
+        .onErrorResume(EmailNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(EMAIL_NOT_VERIFIED, error.getMessage())))
+        .onErrorResume(NotValidEmailException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(NOT_VALID_EMAIL, error.getMessage())));
   }
 
   @PreAuthorize("hasRole('ROLE_USER')")
