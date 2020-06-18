@@ -42,6 +42,9 @@ public class ResponseMessage {
   public static final String ALREADY_VERIFIED_EMAIL_ERROR_RESPONSE = "계정 인증 실패. 이미 인증된 이메일입니다.";
   public static final String ALREADY_VERIFIED_TELEGRAM_ID_ERROR_RESPONSE = "계정 인증 실패. 해당 텔레그램 계정은 이미 인증되었습니다.";
 
+  public static final String START_LADDER_GAME_ARGS_ERROR_RESPONSE = "사다리 잘못된 입력. (ex. /사다리 1번 2번 3번 | 상품1 상품2 상품3)";
+
+
   public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
 }
 

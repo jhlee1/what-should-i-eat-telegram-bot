@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
  */
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 class UserServiceTest {
   @Autowired
   UserService userService;
