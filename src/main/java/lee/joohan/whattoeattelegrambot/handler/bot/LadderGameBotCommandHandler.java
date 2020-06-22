@@ -16,13 +16,13 @@ public class LadderGameBotCommandHandler {
   private final LadderGameService ladderGameService;
 
   public Mono<String> play(Mono<TelegramMessage> telegramMessageMono) {
-    return telegramMessageMono.filter(message -> Pattern.matches("/\\S+ (\\S+)+ | (\\S+)+", message.getText()))
+    return telegramMessageMono.filter(message -> Pattern.matches("/\\S+(\\s*\\S+)+\\s*:\\s*(\\S+\\s*)+", message.getText()))
         .switchIfEmpty(Mono.error(new IllegalArgumentException()))
         .map(telegramMessage -> {
-          String[] args = telegramMessage.getText().split("\\|");
-          String[] firstArg = args[0].split(" ");
-          String[] players = Arrays.copyOfRange(firstArg, 1, firstArg.length - 1);
-          String[] rewards = args[1].split(" ");
+          String[] args = telegramMessage.getText().split(":");
+          String[] firstArg = args[0].strip().split(" ");
+          String[] players = Arrays.copyOfRange(firstArg, 1, firstArg.length);
+          String[] rewards = args[1].strip().split(" ");
 
           if (players.length != rewards.length) {
             throw new IllegalArgumentException();
@@ -30,7 +30,7 @@ public class LadderGameBotCommandHandler {
 
           return ladderGameService.play(players, rewards);
         })
-        .onErrorReturn(IllegalArgumentException.class, ResponseMessage.ALREADY_VERIFIED_EMAIL_ERROR_RESPONSE);
+        .onErrorReturn(IllegalArgumentException.class, ResponseMessage.START_LADDER_GAME_ARGS_ERROR_RESPONSE);
   }
 
 }

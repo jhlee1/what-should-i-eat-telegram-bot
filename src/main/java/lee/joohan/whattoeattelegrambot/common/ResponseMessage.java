@@ -44,7 +44,6 @@ public class ResponseMessage {
 
   public static final String START_LADDER_GAME_ARGS_ERROR_RESPONSE = "사다리 잘못된 입력. (ex. /사다리 1번 2번 3번 | 상품1 상품2 상품3)";
 
-
   public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
 }
 
