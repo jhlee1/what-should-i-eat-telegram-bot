@@ -30,6 +30,10 @@ public class BotCommand {
   public static final String RETURN_CORPORATE_CREDIT_CARD = "/법카반납";
   public static final String LIST_CORPORATE_CREDIT_CARD = "/법카현황";
 
+  public static final String START_ME_GAME = "/저요시작";
+  public static final String ME = "/저요";
+  public static final String END_ME_GAME = "/저요끝";
+
   public static final String VERIFY_ACCOUNT = "/인증";
 
 

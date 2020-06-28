@@ -21,7 +21,7 @@ public class CorporateCardUsageLog {
     private ObjectId userId;
     private CardAction cardAction;
 
-    @CreatedDate // 따로 document를 생성하지 않아서 그런건지 안먹히넹...
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Builder

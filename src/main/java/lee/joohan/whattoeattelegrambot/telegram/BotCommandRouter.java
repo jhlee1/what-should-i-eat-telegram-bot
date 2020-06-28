@@ -5,13 +5,16 @@ import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELETE_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.EAT_OR_NOT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.EDIT_NAME_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.END_ME_GAME;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LADDER_GAME;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_COMMANDS;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.ME;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RANDOM_PICK;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RETURN_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.START_ME_GAME;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.USE_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.VERIFY_ACCOUNT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
@@ -23,6 +26,7 @@ import lee.joohan.whattoeattelegrambot.config.HandleException;
 import lee.joohan.whattoeattelegrambot.handler.bot.CafeBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.CorporateCardBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.LadderGameBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.MeGameCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.RestaurantBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.TelegramMessageBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.UserBotCommandHandler;
@@ -46,6 +50,7 @@ public class BotCommandRouter {
   private final UserBotCommandHandler userBotCommandHandler;
   private final TelegramMessageBotCommandHandler telegramMessageBotCommandHandler;
   private final LadderGameBotCommandHandler ladderGameBotCommandHandler;
+  private final MeGameCommandHandler meGameCommandHandler;
 
 
   @HandleException
@@ -94,6 +99,12 @@ public class BotCommandRouter {
               return userBotCommandHandler.verify(Mono.just(message));
             case LADDER_GAME:
               return ladderGameBotCommandHandler.play(Mono.just(message));
+            case START_ME_GAME:
+              return meGameCommandHandler.create(Mono.just(message));
+            case ME:
+              return meGameCommandHandler.play(Mono.just(message));
+            case END_ME_GAME:
+              return meGameCommandHandler.end(Mono.just(message));
             case BotCommand.EMPTY:
               return Mono.empty();
             default:

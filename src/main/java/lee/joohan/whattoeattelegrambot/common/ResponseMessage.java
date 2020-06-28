@@ -22,6 +22,8 @@ public class ResponseMessage {
 
   public static final String VERIFY_ACCOUNT = "계정 인증 완료";
 
+  public static final String ME_GAME_CREATED = "저요 게임 생성 완료";
+
   public static final String REGISTER_RESTAURANT_ARGS_ERROR_RESPONSE = "식당등록 실패. 입력 형식을 확인하세요. (ex. /맛집추가 이름)";
   public static final String DELETE_RESTAURANT_ARGS_ERROR_RESPONSE = "식당삭제 실패. 입력 형식을 확인하세요. (ex. /맛집삭제 이름)";
   public static final String CHANGE_RESTAURANT_NAME_ARGS_ERROR_RESPONSE = "식당 이름 변경 실패. 입력 형식을 확인하세요. (ex. /맛집이름변경 현재_이름 변경할_이름)";
