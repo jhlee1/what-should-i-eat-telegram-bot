@@ -1,8 +1,6 @@
 package lee.joohan.whattoeattelegrambot.domain;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +21,6 @@ public class Menu {
 
   private String name;
   private int price;
-  private List<Review> reviews;
   private ObjectId creatorId;
 
   @CreatedDate
@@ -36,11 +33,5 @@ public class Menu {
     this.name = name;
     this.price = price;
     this.creatorId = creatorId;
-
-    reviews = new ArrayList<>();
-  }
-
-  public void addReview(Review review) {
-    reviews.add(review);
   }
 }

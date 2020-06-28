@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
  * Created by Joohan Lee on 2020/05/31
  */
 
+@NoArgsConstructor
 @Getter
 @JsonInclude(Include.NON_EMPTY)
 @Document
@@ -71,5 +73,9 @@ public class TelegramMessage {
     messageId = message.getMessageId();
     text = message.getText();
     date = Date.from(Instant.ofEpochSecond(message.getDate()));
+  }
+
+  public void setText(String text) {
+    this.text = text;
   }
 }

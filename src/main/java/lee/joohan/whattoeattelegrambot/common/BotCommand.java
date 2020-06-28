@@ -22,6 +22,7 @@ public class BotCommand {
   public static final String NOT_EAT = "/안먹";
   public static final String EAT_OR_NOT = "/먹을까";
 
+  public static final String LIST_CAFE = "/카페리스트";
   public static final String ADD_CAFE = "/카페추가";
   public static final String DELETE_CAFE = "/카페삭제";
   public static final String PICK_RANDOM_CAFE = "/뭐마";

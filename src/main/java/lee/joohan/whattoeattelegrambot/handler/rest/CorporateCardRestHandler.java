@@ -1,5 +1,7 @@
 package lee.joohan.whattoeattelegrambot.handler.rest;
 
+import static lee.joohan.whattoeattelegrambot.common.ErrorCode.CORPORATE_CARD_RETURN_FAILURE;
+
 import lee.joohan.whattoeattelegrambot.config.security.AccessToken;
 import lee.joohan.whattoeattelegrambot.dto.request.PutBackCorporateCardRequest;
 import lee.joohan.whattoeattelegrambot.dto.request.UseCorporateCardRequest;
@@ -44,7 +46,7 @@ public class CorporateCardRestHandler {
         .flatMap(cardNumAndUserId -> corporateCardService.use(Mono.just(cardNumAndUserId)))
         .map(UseCorporateCardResponse::new)
         .flatMap(res -> ServerResponse.ok().bodyValue(res))
-        .onErrorResume(throwable -> ServerResponse.badRequest().bodyValue(new ErrorResponse("카드 반납실패")));
+        .onErrorResume(throwable -> ServerResponse.badRequest().bodyValue(new ErrorResponse(CORPORATE_CARD_RETURN_FAILURE, "카드 반납실패")));
   }
 
   public Mono<PutBackCorporateCardResponse> putBack(ServerRequest serverRequest) {

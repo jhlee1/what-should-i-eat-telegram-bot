@@ -43,10 +43,10 @@ public class RestaurantBotCommandHandler {
                 .build()
             )
             )
-            .map(User::getId)
+                .map(User::getId)
         )
         .zipWith(messageMono.map(TelegramMessage::getText).map(s -> s.split(" ")[1]))
-        .flatMap(objects -> restaurantService.registerFromTelegram(Mono.just(objects)))
+        .flatMap(objects -> restaurantService.registerFromTelegram(objects.getT1(), objects.getT2()))
         .then(Mono.just(ResponseMessage.REGISTER_RESTAURANT_RESPONSE))
         .onErrorReturn(ResponseMessage.REGISTER_RESTAURANT_ARGS_ERROR_RESPONSE);
   }
@@ -84,14 +84,9 @@ public class RestaurantBotCommandHandler {
     return messageMono.map(message -> message.getText().split(" "))
         .map(input -> input.length > 1 ? Integer.parseInt(input[1]) : 1)
         .flatMap(num ->
-            restaurantService.getAll()
-                .collectList()
-                .map(restaurants ->
-                    random.ints(num, 0, restaurants.size())
-                        .mapToObj(restaurants::get)
-                        .map(Restaurant::getName)
-                        .collect(Collectors.joining(",\n"))
-                )
+            restaurantService.randomSample(num)
+                .map(Restaurant::getName)
+                .collect(Collectors.joining(",\n"))
         )
         .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
         .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
@@ -127,7 +122,7 @@ public class RestaurantBotCommandHandler {
   public Mono<String> deleteRestaurant(Mono<TelegramMessage> messageMono) {
     return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
         .switchIfEmpty(Mono.error(new IllegalArgumentException()))
-        .map(message -> Mono.just(message.getText().split(" ")[1]))
+        .map(message -> message.getText().split(" ")[1])
         .flatMap(restaurantService::deleteRestaurant)
         .then(Mono.just(ResponseMessage.DELETE_RESTAURANT_RESPONSE))
         .onErrorReturn(IllegalArgumentException.class, ResponseMessage.DELETE_RESTAURANT_RESPONSE);

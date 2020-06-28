@@ -23,7 +23,7 @@ public class UserService {
   public Mono<User> getOrRegister(Mono<User> userMono) {
     return userMono
         .map(User::getTelegramId)
-        .<User>flatMap(userRepository::findByTelegramId)
+        .flatMap(userRepository::findByTelegramId)
         .switchIfEmpty(userMono.flatMap(userRepository::save));
   }
 

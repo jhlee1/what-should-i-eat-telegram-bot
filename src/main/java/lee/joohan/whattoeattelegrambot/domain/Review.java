@@ -23,7 +23,7 @@ public class Review {
 
   private String comment;
   private float rate;
-  private User reviewer;
+  private ObjectId reviewerId;
 
   @CreatedDate
   private LocalDateTime createdAt;
@@ -32,9 +32,9 @@ public class Review {
   private LocalDateTime updatedAt;
 
   @Builder
-  public Review(String comment, float rate, User reviewer) {
+  public Review(String comment, float rate, ObjectId reviewerId) {
     this.comment = comment;
     this.rate = Math.round(rate * 10) / 10f;
-    this.reviewer = reviewer;
+    this.reviewerId = reviewerId;
   }
 }
