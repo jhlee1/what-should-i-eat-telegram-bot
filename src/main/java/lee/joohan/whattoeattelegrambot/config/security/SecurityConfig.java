@@ -28,7 +28,7 @@ public class SecurityConfig {
     String[] exceptions = new String[] {"/auth/**"};
 
     return httpSecurity
-        .cors().disable()
+//        .cors().disable()
         .csrf().disable()
         .httpBasic().disable()
         .authenticationManager(authenticationManager)
