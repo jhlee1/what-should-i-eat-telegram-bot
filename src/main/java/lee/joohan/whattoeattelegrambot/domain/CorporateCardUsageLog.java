@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -18,10 +19,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("corporate_card_usage_log")
 @ToString
 public class CorporateCardUsageLog {
+    @Id
     private ObjectId userId;
     private CardAction cardAction;
 
-    @CreatedDate // 따로 document를 생성하지 않아서 그런건지 안먹히넹...
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Builder

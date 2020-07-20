@@ -39,7 +39,7 @@ public class RestaurantService {
         );
   }
 
-  public Mono<Restaurant> registerFromRequest(ObjectId userId ,RegisterRestaurantRequest restaurantRequest) {
+  public Mono<Restaurant> registerFromRequest(ObjectId userId, RegisterRestaurantRequest restaurantRequest) {
     return restaurantRepository.findByName(restaurantRequest.getName())
         .switchIfEmpty(restaurantRepository.save(Restaurant.builder()
             .name(restaurantRequest.getName())

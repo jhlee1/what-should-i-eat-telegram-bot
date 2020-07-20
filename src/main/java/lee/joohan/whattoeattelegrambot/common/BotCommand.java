@@ -33,7 +33,12 @@ public class BotCommand {
 
   public static final String VERIFY_ACCOUNT = "/인증";
 
-
   public static final String LADDER_GAME = "/사다리게임";
+
+  public static final String DELIVERY_START = "/배달";
+  public static final String DELIVERY_ADD_MENU = "/배달추가";
+  public static final String DELIVERY_END = "/배달마감";
+
+
   public static final String EMPTY = "";
 }

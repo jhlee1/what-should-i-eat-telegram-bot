@@ -3,6 +3,9 @@ package lee.joohan.whattoeattelegrambot.telegram;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_CAFE;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELETE_RESTAURANT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELIVERY_ADD_MENU;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELIVERY_END;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELIVERY_START;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.EAT_OR_NOT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.EDIT_NAME_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LADDER_GAME;
@@ -23,6 +26,7 @@ import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.config.HandleException;
 import lee.joohan.whattoeattelegrambot.handler.bot.CafeBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.CorporateCardBotCommandHandler;
+import lee.joohan.whattoeattelegrambot.handler.bot.DeliveryBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.LadderGameBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.RestaurantBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.TelegramMessageBotCommandHandler;
@@ -47,6 +51,7 @@ public class BotCommandRouter {
   private final UserBotCommandHandler userBotCommandHandler;
   private final TelegramMessageBotCommandHandler telegramMessageBotCommandHandler;
   private final LadderGameBotCommandHandler ladderGameBotCommandHandler;
+  private final DeliveryBotCommandHandler deliveryBotCommandHandler;
 
 
   @HandleException
@@ -65,8 +70,7 @@ public class BotCommandRouter {
             case ADD_RESTAURANT:
               return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
             case EDIT_NAME_RESTAURANT:
-              return restaurantBotCommandHandler
-                  .changeRestaurantName(Mono.fromSupplier(() -> message));
+              return restaurantBotCommandHandler.changeRestaurantName(Mono.fromSupplier(() -> message));
             case DELETE_RESTAURANT:
               return restaurantBotCommandHandler.deleteRestaurant(Mono.fromSupplier(() -> message));
             case LIST_RESTAURANT:
@@ -97,6 +101,13 @@ public class BotCommandRouter {
               return userBotCommandHandler.verify(Mono.just(message));
             case LADDER_GAME:
               return ladderGameBotCommandHandler.play(Mono.just(message));
+            case DELIVERY_START:
+              return deliveryBotCommandHandler.start(message);
+             case DELIVERY_ADD_MENU:
+               return deliveryBotCommandHandler.addMenu(message);
+            case DELIVERY_END:
+              return deliveryBotCommandHandler.end(message);
+
             case BotCommand.EMPTY:
               return Mono.empty();
             default:

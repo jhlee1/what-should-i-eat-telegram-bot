@@ -12,6 +12,7 @@ import org.telegram.telegrambots.ApiContextInitializer;
 public class WhatToEatTelegramBotApplication {
   static {
     ApiContextInitializer.init();
+//    BlockHound.install();
   }
 
   public static void main(String[] args) {

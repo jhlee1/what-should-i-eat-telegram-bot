@@ -23,7 +23,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @ToString
 public class CorporateCard {
   @Id
-  ObjectId id;
+  private ObjectId id;
 
   private int cardNum;
   private ObjectId currentUserId;

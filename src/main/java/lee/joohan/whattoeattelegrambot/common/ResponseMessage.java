@@ -44,6 +44,9 @@ public class ResponseMessage {
 
   public static final String START_LADDER_GAME_ARGS_ERROR_RESPONSE = "사다리 잘못된 입력. (ex. /사다리 1번 2번 3번 | 상품1 상품2 상품3)";
 
-  public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
+  public static final String DELIVERY_NOT_FOUND_ERROR_RESPONSE = "진행중인 배달아이템이 없습니다. 새로 시작하세요. (ex. /배달)";
+  public static final String DELIVERY_ADD_MENU_ARGS_ERROR_RESPONSE = "잘못된 배달메뉴 추가. (ex. /배달추가 김밥 1)";
+
+ public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
 }
 

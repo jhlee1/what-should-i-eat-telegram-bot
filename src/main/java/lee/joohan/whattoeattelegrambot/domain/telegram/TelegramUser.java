@@ -25,4 +25,8 @@ public class TelegramUser {
     username = user.getUserName();
     languageCode = user.getLanguageCode();
   }
+
+  public String getFullName() {
+    return lastName + firstName;
+  }
 }
