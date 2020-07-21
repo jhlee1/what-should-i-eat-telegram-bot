@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyExistDeliveryException;
+import lee.joohan.whattoeattelegrambot.exception.NotDeliveryOwnerException;
 import lee.joohan.whattoeattelegrambot.exception.NotFoundDeliveryException;
 import lee.joohan.whattoeattelegrambot.service.DeliveryService;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +81,8 @@ public class DeliveryBotCommandHandler {
         .stream()
         .map(entry -> entry.getKey() + " x " + entry.getValue())
         .collect(Collectors.joining("\n"))
-    ).onErrorReturn(NotFoundDeliveryException.class, ResponseMessage.DELIVERY_NOT_FOUND_ERROR_RESPONSE);
+    )
+        .onErrorReturn(NotFoundDeliveryException.class, ResponseMessage.DELIVERY_NOT_FOUND_ERROR_RESPONSE)
+        .onErrorReturn(NotDeliveryOwnerException.class, ResponseMessage.ONLY_OWNER_CAN_END_DELIVERY_ERROR_RESPONSE);
   }
 }

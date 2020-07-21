@@ -46,6 +46,7 @@ public class ResponseMessage {
 
   public static final String DELIVERY_NOT_FOUND_ERROR_RESPONSE = "진행중인 배달아이템이 없습니다. 새로 시작하세요. (ex. /배달)";
   public static final String DELIVERY_ADD_MENU_ARGS_ERROR_RESPONSE = "잘못된 배달메뉴 추가. (ex. /배달추가 김밥 1)";
+  public static final String ONLY_OWNER_CAN_END_DELIVERY_ERROR_RESPONSE = "배달을 시작한 사람만 마감가능.";
 
  public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
 }
