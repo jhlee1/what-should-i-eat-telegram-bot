@@ -75,4 +75,5 @@ public class AuthenticationRestHandler {
   public Mono<ServerResponse> token(ServerRequest serverRequest) {
     return serverRequest.principal().flatMap(principal -> ServerResponse.ok().bodyValue(principal)).log();
   }
+
 }

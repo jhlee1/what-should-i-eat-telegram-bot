@@ -20,13 +20,12 @@ public class User {
   @Id
   private ObjectId id;
 
-  private long telegramId;
+  private Long telegramId;
   private String lastName;
   private String firstName;
   private String email;
   private List<UserRole> roles;
   private String picture;
-  private boolean telegramVerified;
 
   @Builder
   public User(long telegramId, String lastName, String firstName, String email, String picture) {
@@ -49,11 +48,14 @@ public class User {
     this.telegramId = telegramId;
     this.lastName = lastName;
     this.firstName = firstName;
-    telegramVerified = true;
   }
 
   public boolean isAdmin() {
     return roles.stream()
         .anyMatch(UserRole.ROLE_ADMIN::equals);
+  }
+
+  public boolean isTelegramVerified() {
+    return telegramId != null;
   }
 }

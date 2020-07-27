@@ -35,6 +35,14 @@ public class BotCommand {
 
   public static final String LADDER_GAME = "/사다리게임";
 
+  public static final String CREATE_LADDER_GAME_USER_GROUP = "/유저그룹생성";
+  public static final String DELETE_LADDER_GAME_USER_GROUP = "/유저그룹삭제";
+  public static final String LIST_LADDER_GAME_USER_GROUP = "/유저그룹리스트";
+  public static final String ADD_LADDER_GAME_USER_GROUP_MEMBER = "/인원추가";
+  public static final String REMOVE_LADDER_GAME_USER_GROUP_MEMBER = "/인원삭제";
+  public static final String SPLIT_LADDER_GAME_GROUP = "/그룹나누기";
+  public static final String SHOW_GAME_GROUP_MEMBER = "/멤버보기";
+
   public static final String DELIVERY_START = "/배달";
   public static final String DELIVERY_ADD_MENU = "/배달추가";
   public static final String DELIVERY_END = "/배달마감";
