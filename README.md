@@ -1,4 +1,4 @@
-# what-should-i-eat-telegram-bot
+# what-to-eat-telegram-bot
 
 - I have created it for my team members who have a hard time to pick one for a lunch from the restaurants around my company 
 (점심시간마다 식당을 고르기 힘들어하는 팀원들을 위해 제작)
