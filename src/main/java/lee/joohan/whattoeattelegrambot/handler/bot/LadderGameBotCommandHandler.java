@@ -167,7 +167,7 @@ public class LadderGameBotCommandHandler {
           return ladderGameService.create(users, rewards)
               .map(Ladder::getId)
               .flatMap(ladderGameService::play)
-              .map(Ladder::printGrid);
+              .map(Ladder::showResult);
         }).onErrorReturn(NotFoundGameGroupException.class, "사다리 그룹 나누기 실패. 존재하지 않는 그룹명입니다.");
   }
 }
