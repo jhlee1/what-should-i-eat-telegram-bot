@@ -1,5 +1,7 @@
 package lee.joohan.whattoeattelegrambot.handler.bot;
 
+import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.RANDOM_PICK_ARGS_ERROR_RESPONSE;
+
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
@@ -51,4 +53,17 @@ public class CafeBotCommandHandler {
         .collect(Collectors.joining(",\n"));
   }
 
+  @Transactional(readOnly = true)
+  public Mono<String> random(TelegramMessage telegramMessage) {
+    String[] input = telegramMessage.getText().split(" ");
+
+    int num = input.length > 1 ? Integer.parseInt(input[1]) : 1;
+
+    return cafeService.randomSample(num)
+        .map(Cafe::getName)
+        .sort()
+        .collect(Collectors.joining("\n"))
+        .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
+        .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
+  }
 }

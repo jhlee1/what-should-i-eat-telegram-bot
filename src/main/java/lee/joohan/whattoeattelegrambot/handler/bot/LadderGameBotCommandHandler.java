@@ -79,6 +79,7 @@ public class LadderGameBotCommandHandler {
   public Mono<String> listGameGroups() {
     return ladderGameGroupService.getAll()
         .map(LadderGameGroup::getName)
+        .sort()
         .collect(Collectors.joining("\n"));
   }
 
@@ -92,10 +93,19 @@ public class LadderGameBotCommandHandler {
     String groupName = message.split(" ")[1];
 
     return ladderGameGroupService.get(groupName)
-        .map(it -> it.getUsers()
-            .stream()
-            .collect(Collectors.joining("\n"))
-        )
+        .map(it -> {
+          String list = it.getUsers()
+              .stream()
+              .sorted()
+              .collect(Collectors.joining("\n"));
+
+          return new StringBuilder(list)
+              .append("\n")
+              .append("총: ")
+              .append(it.getUsers().size())
+              .append(" 명")
+              .toString();
+        })
         .onErrorReturn(NotFoundGameGroupException.class, "존재하지 않는 그룹명입니다.");
   }
 

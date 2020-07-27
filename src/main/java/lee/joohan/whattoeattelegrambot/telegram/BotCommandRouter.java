@@ -18,6 +18,7 @@ import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_CORPORATE_C
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_LADDER_GAME_USER_GROUP;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_RESTAURANT;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.NOT_EAT;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.PICK_RANDOM_CAFE;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RANDOM_PICK;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.REMOVE_LADDER_GAME_USER_GROUP_MEMBER;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.RETURN_CORPORATE_CREDIT_CARD;
@@ -96,6 +97,8 @@ public class BotCommandRouter {
                   return cafeBotCommandHandler.addCafe(Mono.just(message));
                 case LIST_CAFE:
                   return cafeBotCommandHandler.list();
+                case PICK_RANDOM_CAFE:
+                  return cafeBotCommandHandler.random(message);
                 case USE_CORPORATE_CREDIT_CARD:
                   return corporateCardBotCommandHandler.useCard(Mono.just(message));
                 case RETURN_CORPORATE_CREDIT_CARD:

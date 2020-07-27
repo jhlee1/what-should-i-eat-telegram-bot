@@ -34,6 +34,11 @@ public class CafeService {
         );
   }
 
+  public Flux<Cafe> randomSample(int num) {
+    return cafeRepository.getRandomSample(num);
+  }
+
+  @Transactional(readOnly = true)
   public Flux<Cafe> getAll() {
     return cafeRepository.findAll();
   }
