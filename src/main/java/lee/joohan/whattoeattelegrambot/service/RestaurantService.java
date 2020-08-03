@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 /**
  * Created by Joohan Lee on 2020/02/15
@@ -70,13 +69,14 @@ public class RestaurantService {
   }
 
   @Transactional
-  public Mono<Restaurant> changeName(Mono<Tuple2<Tuple2<String,String>,User>> fromToUpdater) {
-    return fromToUpdater.flatMap(objects -> restaurantRepository.findByName(objects.getT1().getT1()))
-        .switchIfEmpty(Mono.error(NotFoundRestaurantException.noParam()))
-        .zipWith(fromToUpdater.map(objects -> objects.getT1().getT2()))
-        .doOnNext(restaurant -> restaurant.getT1().changeName(restaurant.getT2()))
-        .map(objects -> objects.getT1())
-        .flatMap(restaurantRepository::save);
+  public Mono<Restaurant> changeName(String from, String to, User updater) {
+    return restaurantRepository.findByName(from)
+        .switchIfEmpty(Mono.error(NotFoundRestaurantException.fromName(from)))
+        .flatMap(restaurant -> {
+          restaurant.changeName(to, updater.getId());
+
+          return restaurantRepository.save(restaurant);
+        });
   }
 
   @Transactional

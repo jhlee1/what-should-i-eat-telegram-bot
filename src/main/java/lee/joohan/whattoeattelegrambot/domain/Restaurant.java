@@ -28,6 +28,7 @@ public class Restaurant {
   private List<Review> reviews;
   private List<Menu> menus;
   private ObjectId creatorId;
+  private ObjectId updaterId;
 
   @CreatedDate
   private LocalDateTime createdAt;
@@ -49,7 +50,8 @@ public class Restaurant {
     menus.add(menu);
   }
 
-  public void changeName(String to) {
+  public void changeName(String to, ObjectId updaterId) {
     name = to;
+    this.updaterId = updaterId;
   }
 }

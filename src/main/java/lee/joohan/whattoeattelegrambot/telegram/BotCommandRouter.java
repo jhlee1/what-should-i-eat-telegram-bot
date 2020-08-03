@@ -63,9 +63,8 @@ public class BotCommandRouter {
 
 
   @HandleException
-  public Mono<String> handle(Mono<Message> messageMono) {
-    return messageMono
-        .flatMap(telegramMessageBotCommandHandler::create)
+  public Mono<String> handle(Message telegramMessage) {
+        return telegramMessageBotCommandHandler.create(telegramMessage)
         .flatMap(
             message -> {
               String command = Optional.ofNullable(message.getText())
@@ -76,11 +75,11 @@ public class BotCommandRouter {
 
               switch (command) {
                 case ADD_RESTAURANT:
-                  return restaurantBotCommandHandler.addRestaurant(Mono.fromSupplier(() -> message));
+                  return restaurantBotCommandHandler.addRestaurant(message);
                 case EDIT_NAME_RESTAURANT:
-                  return restaurantBotCommandHandler.changeRestaurantName(Mono.fromSupplier(() -> message));
+                  return restaurantBotCommandHandler.changeRestaurantName(message);
                 case DELETE_RESTAURANT:
-                  return restaurantBotCommandHandler.deleteRestaurant(Mono.fromSupplier(() -> message));
+                  return restaurantBotCommandHandler.deleteRestaurant(message);
                 case LIST_RESTAURANT:
                   return restaurantBotCommandHandler.listRestaurant();
                 case RANDOM_PICK:
@@ -106,7 +105,7 @@ public class BotCommandRouter {
                 case LIST_CORPORATE_CREDIT_CARD:
                   return corporateCardBotCommandHandler.listCards();
                 case EAT_OR_NOT:
-                  return restaurantBotCommandHandler.eatOrNot(Mono.just(message));
+                  return restaurantBotCommandHandler.eatOrNot(message);
                 case VERIFY_ACCOUNT:
                   return userBotCommandHandler.verify(Mono.just(message));
                 case LADDER_GAME:

@@ -30,11 +30,13 @@ public class CafeBotCommandHandler {
     return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
         .switchIfEmpty(Mono.error(new IllegalArgumentException()))
         .flatMap( message ->
-            userService.getOrRegister(Mono.just(User.builder()
-                .firstName(message.getFrom().getFirstName())
-                .lastName(message.getFrom().getLastName())
-                .telegramId(message.getFrom().getId())
-                .build())))
+            userService.getOrRegister(
+                User.builder()
+                    .firstName(message.getFrom().getFirstName())
+                    .lastName(message.getFrom().getLastName())
+                    .telegramId(message.getFrom().getId())
+                    .build())
+        )
         .zipWith(
             messageMono
                 .map(TelegramMessage::getText)

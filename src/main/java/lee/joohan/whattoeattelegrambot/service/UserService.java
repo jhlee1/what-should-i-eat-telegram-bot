@@ -20,11 +20,9 @@ public class UserService {
   private final UserRepository userRepository;
 
   @Transactional
-  public Mono<User> getOrRegister(Mono<User> userMono) {
-    return userMono
-        .map(User::getTelegramId)
-        .flatMap(userRepository::findByTelegramId)
-        .switchIfEmpty(userMono.flatMap(userRepository::save));
+  public Mono<User> getOrRegister(User user) {
+    return userRepository.findByTelegramId(user.getTelegramId())
+        .switchIfEmpty(userRepository.save(user));
   }
 
   @Transactional

@@ -42,7 +42,7 @@ public class CorporateCardBotCommandHandler {
                 .firstName(message.getFrom().getFirstName())
                 .lastName(message.getFrom().getLastName())
                 .build()
-            ).flatMap(user -> userService.getOrRegister(Mono.just(user)))
+            ).flatMap(user -> userService.getOrRegister(user))
                 .map(User::getId)
         )
         .flatMap(item ->corporateCardService.use(Mono.just(item)))
@@ -58,15 +58,15 @@ public class CorporateCardBotCommandHandler {
             messageMono
                 .filter(message -> Pattern.matches("/\\S+", message.getText()))
                 .switchIfEmpty(Mono.error(IllegalArgumentException::new))
-                .map(message -> userService.getOrRegister(
-                    Mono.just(
+                .map(message ->
+                    userService.getOrRegister(
                         User.builder()
                             .telegramId(message.getFrom().getId())
                             .firstName(message.getFrom().getFirstName())
                             .lastName(message.getFrom().getLastName())
                             .build()
                     )
-                ))
+                )
                 .flatMapMany(user -> corporateCardService.putBackOwnCard(user.map(User::getId)))
                 .then(Mono.empty())
         )
@@ -77,7 +77,7 @@ public class CorporateCardBotCommandHandler {
                 .firstName(message.getFrom().getFirstName())
                 .lastName(message.getFrom().getLastName())
                 .build()
-            ).flatMap(user -> userService.getOrRegister(Mono.just(user)))
+            ).flatMap(user -> userService.getOrRegister(user))
                 .map(User::getId)
         )
         .flatMap(tuple -> corporateCardService.putBack(Mono.just(tuple)))

@@ -8,7 +8,6 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Joohan Lee on 2020/02/15
@@ -30,7 +29,7 @@ public class WhatShouldIEatBot extends TelegramLongPollingBot {
 
   @Override
   public void onUpdateReceived(Update update) {
-    botCommandRouter.handle(Mono.fromSupplier(() -> update.getMessage()))
+    botCommandRouter.handle(update.getMessage())
         .doOnNext(s -> reply(update.getMessage().getChatId(), s))
         .subscribe();
   }
