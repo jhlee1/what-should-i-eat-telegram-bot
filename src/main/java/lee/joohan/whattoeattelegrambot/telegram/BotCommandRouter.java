@@ -31,7 +31,6 @@ import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 import java.util.Optional;
 import lee.joohan.whattoeattelegrambot.common.BotCommand;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
-import lee.joohan.whattoeattelegrambot.config.HandleException;
 import lee.joohan.whattoeattelegrambot.handler.bot.CafeBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.CorporateCardBotCommandHandler;
 import lee.joohan.whattoeattelegrambot.handler.bot.DeliveryBotCommandHandler;
@@ -62,7 +61,6 @@ public class BotCommandRouter {
   private final DeliveryBotCommandHandler deliveryBotCommandHandler;
 
 
-  @HandleException
   public Mono<String> handle(Message telegramMessage) {
         return telegramMessageBotCommandHandler.create(telegramMessage)
         .flatMap(
