@@ -43,7 +43,7 @@ public class CorporateCardRestHandler {
                 .map(principal -> (AccessToken) principal)
                 .map(accessToken -> new ObjectId(accessToken.getCredentials().toString()))
         )
-        .flatMap(cardNumAndUserId -> corporateCardService.use(Mono.just(cardNumAndUserId)))
+        .flatMap(cardNumAndUserId -> corporateCardService.use(cardNumAndUserId.getT1(), cardNumAndUserId.getT2()))
         .map(UseCorporateCardResponse::new)
         .flatMap(res -> ServerResponse.ok().bodyValue(res))
         .onErrorResume(throwable -> ServerResponse.badRequest().bodyValue(new ErrorResponse(CORPORATE_CARD_RETURN_FAILURE, "카드 반납실패")));
@@ -59,7 +59,7 @@ public class CorporateCardRestHandler {
                 .map(principal -> (AccessToken) principal)
                 .map(accessToken -> new ObjectId(accessToken.getCredentials().toString()))
         )
-        .flatMap(cardNumAndUserId -> corporateCardService.putBack(Mono.just(cardNumAndUserId)))
+        .flatMap(cardNumAndUserId -> corporateCardService.putBack(cardNumAndUserId.getT1(), cardNumAndUserId.getT2()))
         .map(PutBackCorporateCardResponse::new);
   }
 

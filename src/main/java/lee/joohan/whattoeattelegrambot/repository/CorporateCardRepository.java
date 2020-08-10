@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
  * Created by Joohan Lee on 2020/04/07
  */
 public interface CorporateCardRepository extends ReactiveMongoRepository<CorporateCard, ObjectId>, CorporateCardRepositoryCustom {
-  Mono<CorporateCard> findByCardNum(Mono<Integer> cardNum);
-  Flux<CorporateCard> findByIsBorrowedIsTrueAndCurrentUserId(Mono<ObjectId> currentUserId);
+  Mono<CorporateCard> findByCardNum(int cardNum);
+  Flux<CorporateCard> findByIsBorrowedIsTrueAndCurrentUserId(ObjectId currentUserId);
 
 }

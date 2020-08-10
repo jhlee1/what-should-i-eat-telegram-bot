@@ -83,33 +83,29 @@ public class BotCommandRouter {
                 case LIST_RESTAURANT:
                   return restaurantBotCommandHandler.listRestaurant();
                 case RANDOM_PICK:
-//        if (message.getChat().getId() == -310678804) {
-//            return Mono.just("탕수육");
-//        }
-                  return restaurantBotCommandHandler
-                      .randomPickRestaurant(Mono.fromSupplier(() -> message));
+                  return restaurantBotCommandHandler.randomPickRestaurant(message);
                 case LIST_COMMANDS:
                   return restaurantBotCommandHandler.listCommands();
                 case NOT_EAT:
                   return Mono.just(DO_NOT_EAT);
                 case ADD_CAFE:
-                  return cafeBotCommandHandler.addCafe(Mono.just(message));
+                  return cafeBotCommandHandler.addCafe(message);
                 case LIST_CAFE:
                   return cafeBotCommandHandler.list();
                 case PICK_RANDOM_CAFE:
                   return cafeBotCommandHandler.random(message);
                 case USE_CORPORATE_CREDIT_CARD:
-                  return corporateCardBotCommandHandler.useCard(Mono.just(message));
+                  return corporateCardBotCommandHandler.useCard(message);
                 case RETURN_CORPORATE_CREDIT_CARD:
-                  return corporateCardBotCommandHandler.putBackCard(Mono.just(message));
+                  return corporateCardBotCommandHandler.putBackCard(message);
                 case LIST_CORPORATE_CREDIT_CARD:
                   return corporateCardBotCommandHandler.listCards();
                 case EAT_OR_NOT:
                   return restaurantBotCommandHandler.eatOrNot(message);
                 case VERIFY_ACCOUNT:
-                  return userBotCommandHandler.verify(Mono.just(message));
+                  return userBotCommandHandler.verify(message);
                 case LADDER_GAME:
-                  return ladderGameBotCommandHandler.play(Mono.just(message));
+                  return ladderGameBotCommandHandler.play(message);
                 case DELIVERY_START:
                   return deliveryBotCommandHandler.start(message);
                 case DELIVERY_ADD_MENU:

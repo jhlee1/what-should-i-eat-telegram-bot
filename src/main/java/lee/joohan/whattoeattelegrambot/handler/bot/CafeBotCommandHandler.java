@@ -26,25 +26,19 @@ public class CafeBotCommandHandler {
   private final UserService userService;
   private final CafeService cafeService;
 
-  public Mono<String> addCafe(Mono<TelegramMessage> messageMono) {
-    return messageMono.filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
-        .switchIfEmpty(Mono.error(new IllegalArgumentException()))
-        .flatMap( message ->
-            userService.getOrRegister(
-                User.builder()
-                    .firstName(message.getFrom().getFirstName())
-                    .lastName(message.getFrom().getLastName())
-                    .telegramId(message.getFrom().getId())
-                    .build())
-        )
-        .zipWith(
-            messageMono
-                .map(TelegramMessage::getText)
-                .map(s -> s.split(" ")[1])
-        )
-        .flatMap(objects -> cafeService.register(objects.getT1(), objects.getT2()))
-        .then(Mono.just(ResponseMessage.REGISTER_CAFE_RESPONSE))
-        .onErrorReturn(IllegalArgumentException.class, ResponseMessage.REGISTER_CAFE_ARGS_ERROR_RESPONSE);
+  public Mono<String> addCafe(TelegramMessage message) {
+    if (!Pattern.matches("/\\S+ \\S+", message.getText())) {
+      return Mono.just(ResponseMessage.REGISTER_CAFE_ARGS_ERROR_RESPONSE);
+    }
+
+    return userService.getOrRegister(
+        User.builder()
+            .firstName(message.getFrom().getFirstName())
+            .lastName(message.getFrom().getLastName())
+            .telegramId(message.getFrom().getId())
+            .build())
+        .flatMap(it -> cafeService.register(it, message.getText().split(" ")[1]))
+        .map(it -> ResponseMessage.REGISTER_CAFE_RESPONSE);
   }
 
   @Transactional(readOnly = true)

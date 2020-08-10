@@ -22,20 +22,18 @@ import reactor.core.publisher.Mono;
 public class UserBotCommandHandler {
   private final UserService userService;
 
-  public Mono<String> verify(Mono<TelegramMessage> messageMono) {
-    return messageMono
-        .filter(message -> Pattern.matches("/\\S+ \\S+", message.getText()))
-        .switchIfEmpty(Mono.error(IllegalArgumentException::new))
-        .flatMap(message ->
-            userService.verifyTelegram(
-                message.getText().split(" ")[1],
-                message.getFrom().getId(),
-                message.getFrom().getFirstName(),
-                message.getFrom().getLastName()
-            )
-        )
-        .then(Mono.just(ResponseMessage.VERIFY_ACCOUNT))
-        .onErrorReturn(IllegalArgumentException.class, ResponseMessage.VERIFY_ACCOUNT_ARGS_ERROR_RESPONSE)
+  public Mono<String> verify(TelegramMessage message) {
+    if (!Pattern.matches("/\\S+ \\S+", message.getText())) {
+      return Mono.just(ResponseMessage.VERIFY_ACCOUNT_ARGS_ERROR_RESPONSE);
+    }
+
+    return userService.verifyTelegram(
+        message.getText().split(" ")[1],
+        message.getFrom().getId(),
+        message.getFrom().getFirstName(),
+        message.getFrom().getLastName()
+    )
+        .map(it -> ResponseMessage.VERIFY_ACCOUNT)
         .onErrorReturn(NotFoundUserException.class, ResponseMessage.VERIFY_ACCOUNT_NOT_FOUND_USER_ERROR_RESPONSE)
         .onErrorReturn(AlreadyVerifiedTelegramIdException.class, ResponseMessage.ALREADY_VERIFIED_TELEGRAM_ID_ERROR_RESPONSE)
         .onErrorReturn(AlreadyVerifiedEmailException.class, ResponseMessage.ALREADY_VERIFIED_EMAIL_ERROR_RESPONSE);

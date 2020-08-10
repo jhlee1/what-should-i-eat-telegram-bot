@@ -24,25 +24,23 @@ public class LadderGameBotCommandHandler {
   private final LadderGameService ladderGameService;
   private final LadderGameGroupService ladderGameGroupService;
 
-  public Mono<String> play(Mono<TelegramMessage> telegramMessageMono) {
-    return telegramMessageMono.filter(message -> Pattern.matches("/\\S+(\\s*\\S+)+\\s*:\\s*(\\S+\\s*)+", message.getText()))
-        .switchIfEmpty(Mono.error(new IllegalArgumentException()))
-        .flatMap(telegramMessage -> {
-          String[] args = telegramMessage.getText().split(":");
-          String[] firstArg = args[0].strip().split(" ");
-          String[] players = Arrays.copyOfRange(firstArg, 1, firstArg.length);
-          String[] rewards = args[1].strip().split(" ");
+  public Mono<String> play(TelegramMessage message) {
+    if (!Pattern.matches("/\\S+(\\s*\\S+)+\\s*:\\s*(\\S+\\s*)+", message.getText())) {
+      return Mono.just(ResponseMessage.START_LADDER_GAME_ARGS_ERROR_RESPONSE);
+    }
 
-          if (players.length != rewards.length) {
-            return Mono.error(new IllegalArgumentException());
-          }
+    String[] args = message.getText().split(":");
+    String[] firstArg = args[0].strip().split(" ");
+    String[] players = Arrays.copyOfRange(firstArg, 1, firstArg.length);
+    String[] rewards = args[1].strip().split(" ");
 
-          return ladderGameService.create(Arrays.asList(players), Arrays.asList(rewards))
-              .map(Ladder::getId);
-        })
-        .flatMap(id -> ladderGameService.play(id))
-        .map(Ladder::printGrid)
-        .onErrorReturn(IllegalArgumentException.class, ResponseMessage.START_LADDER_GAME_ARGS_ERROR_RESPONSE);
+    if (players.length != rewards.length) {
+      return Mono.just(ResponseMessage.START_LADDER_GAME_ARGS_ERROR_RESPONSE);
+    }
+
+    return ladderGameService.create(Arrays.asList(players), Arrays.asList(rewards))
+        .flatMap(ladder -> ladderGameService.play(ladder.getId()))
+        .map(Ladder::printGrid);
   }
 
   public Mono<String> createGameGroup(TelegramMessage telegramMessage) {

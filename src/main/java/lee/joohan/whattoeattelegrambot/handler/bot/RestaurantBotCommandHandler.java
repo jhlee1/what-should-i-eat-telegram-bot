@@ -2,7 +2,6 @@ package lee.joohan.whattoeattelegrambot.handler.bot;
 
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.DO_NOT_EAT;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.EAT;
-import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.RANDOM_PICK_ARGS_ERROR_RESPONSE;
 
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -54,16 +53,17 @@ public class RestaurantBotCommandHandler {
         .map(it -> ResponseMessage.REGISTER_RESTAURANT_RESPONSE);
   }
 
-  public Mono<String> randomPickRestaurant(Mono<TelegramMessage> messageMono) {
-    return messageMono.map(message -> message.getText().split(" "))
-        .map(input -> input.length > 1 ? Integer.parseInt(input[1]) : 1)
-        .flatMap(num ->
-            restaurantService.randomSample(num)
-                .map(Restaurant::getName)
-                .collect(Collectors.joining(",\n"))
-        )
-        .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
-        .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
+  public Mono<String> randomPickRestaurant(TelegramMessage message) {
+    String[] input = message.getText().split(" ") ;
+    int num = 1;
+
+    if (Pattern.matches("/\\S+ \\d+", message.getText())) {
+      num = Integer.parseInt(input[1]);
+    }
+
+    return restaurantService.randomSample(num)
+        .map(Restaurant::getName)
+        .collect(Collectors.joining(",\n"));
   }
 
   public Mono<String> listRestaurant() {

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 /**
  * Created by Joohan Lee on 2020/04/07
@@ -24,52 +23,38 @@ public class CorporateCardService {
   private final CorporateCardRepository corporateCardRepository;
 
   @Transactional
-  public Mono<CorporateCard> use(Mono<Tuple2<Integer, ObjectId>> cardNumberUserIdMono) {
-    return corporateCardRepository.findByCardNum(cardNumberUserIdMono.map(Tuple2::getT1))
-        .switchIfEmpty(cardNumberUserIdMono
-            .map(Tuple2::getT1)
-            .map(CorporateCard::new)
-        ).flatMap(card ->
-            cardNumberUserIdMono.map(mono -> {
-                  card.use(mono.getT2());
+  public Mono<CorporateCard> use(int cardNum, ObjectId userId) {
+    return corporateCardRepository.findByCardNum(cardNum)
+        .switchIfEmpty(Mono.just(new CorporateCard(cardNum)))
+        .flatMap(card -> {
+          card.use(userId);
 
-                  return card;
-                }
-            )
-        )
-        .flatMap(corporateCardRepository::save);
+          return corporateCardRepository.save(card);
+        });
   }
 
   @Transactional
-  public Mono<CorporateCard> putBack(Mono<Tuple2<Integer, ObjectId>> cardNumberUserIdMono) {
-    return cardNumberUserIdMono.zipWith(
-        cardNumberUserIdMono
-            .flatMap(cardNumberUserId ->
-                corporateCardRepository.findByCardNum(cardNumberUserIdMono.map(Tuple2::getT1))
+  public Mono<CorporateCard> putBack(int cardNum, ObjectId userId) {
+    return corporateCardRepository.findByCardNum(cardNum)
+        .switchIfEmpty(Mono.error(() ->
+                new NotBorrowedAnyCardException(userId.toHexString())
             )
-            .switchIfEmpty(Mono.error(() ->
-                new NotBorrowedAnyCardException(cardNumberUserIdMono.block().getT2().toString()))
-            )
-    ).flatMap(cardTuple -> {
-      cardTuple.getT2()
-          .putBack(cardTuple.getT1().getT2());
+        ).flatMap(card -> {
+          card.putBack(userId);
 
-      return corporateCardRepository.save(cardTuple.getT2());
-    });
+          return corporateCardRepository.save(card);
+        });
   }
 
   @Transactional
-  public Flux<CorporateCard> putBackOwnCard(Mono<ObjectId> userId) {
-    Flux<CorporateCard> corporateCardFlux = userId
-        .flatMapMany(id -> corporateCardRepository.findByIsBorrowedIsTrueAndCurrentUserId(Mono.just(id)))
-        .switchIfEmpty(Mono.error(() -> new NotBorrowedAnyCardException(userId.map(ObjectId::toString).block())))
+  public Flux<CorporateCard> putBackOwnCard(ObjectId userId) {
+    return corporateCardRepository.findByIsBorrowedIsTrueAndCurrentUserId(userId)
+        .switchIfEmpty(Mono.error(() -> new NotBorrowedAnyCardException(userId.toHexString())))
         .flatMap(corporateCard -> {
           corporateCard.putBack(corporateCard.getCurrentUserId());
 
           return corporateCardRepository.save(corporateCard);
         });
-
-    return corporateCardRepository.saveAll(corporateCardFlux);
   }
 
   @Transactional(readOnly = true)
