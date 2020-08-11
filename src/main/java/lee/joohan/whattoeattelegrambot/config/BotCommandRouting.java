@@ -6,9 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by Joohan Lee on 2020/02/16
+ * Created by Joohan Lee on 2020/08/10
  */
+
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HandleException {
+public @interface BotCommandRouting {
+  String value() default "";
 }

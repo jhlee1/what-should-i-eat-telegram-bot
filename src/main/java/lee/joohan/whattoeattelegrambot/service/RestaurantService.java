@@ -1,7 +1,6 @@
 package lee.joohan.whattoeattelegrambot.service;
 
 import lee.joohan.whattoeattelegrambot.domain.Restaurant;
-import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.dto.request.RegisterRestaurantRequest;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyExistRestaurantException;
 import lee.joohan.whattoeattelegrambot.exception.NotFoundRestaurantException;
@@ -66,17 +65,6 @@ public class RestaurantService {
   @Transactional(readOnly = true)
   public Mono<Restaurant> get(String name) {
     return restaurantRepository.findByName(name);
-  }
-
-  @Transactional
-  public Mono<Restaurant> changeName(String from, String to, User updater) {
-    return restaurantRepository.findByName(from)
-        .switchIfEmpty(Mono.error(NotFoundRestaurantException.fromName(from)))
-        .flatMap(restaurant -> {
-          restaurant.changeName(to, updater.getId());
-
-          return restaurantRepository.save(restaurant);
-        });
   }
 
   @Transactional
