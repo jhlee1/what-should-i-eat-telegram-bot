@@ -1,11 +1,15 @@
 package lee.joohan.whattoeattelegrambot.handler.bot;
 
 import static java.util.stream.Collectors.summingInt;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELIVERY_ADD_MENU;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELIVERY_END;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELIVERY_START;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
+import lee.joohan.whattoeattelegrambot.config.BotCommandRouting;
 import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.exception.AlreadyExistDeliveryException;
 import lee.joohan.whattoeattelegrambot.exception.NotDeliveryOwnerException;
@@ -25,6 +29,7 @@ public class DeliveryBotCommandHandler {
   private final DeliveryService deliveryService;
 
 
+  @BotCommandRouting(DELIVERY_START)
   public Mono<String> start(TelegramMessage telegramMessage) {
     return deliveryService.startDelivery(
         telegramMessage.getChat().getId(),
@@ -34,6 +39,7 @@ public class DeliveryBotCommandHandler {
         .onErrorReturn(AlreadyExistDeliveryException.class, "이미 배달모집 중입니다. 마무리하고 다시하세요.");
   }
 
+  @BotCommandRouting(DELIVERY_ADD_MENU)
   public Mono<String> addMenu(TelegramMessage telegramMessage) {
     if (!Pattern.matches("/\\S+ \\S+( \\d)?", telegramMessage.getText())) {
       return Mono.just(ResponseMessage.DELIVERY_ADD_MENU_ARGS_ERROR_RESPONSE);
@@ -65,6 +71,7 @@ public class DeliveryBotCommandHandler {
 
   }
 
+  @BotCommandRouting(DELIVERY_END)
   public Mono<String> end(TelegramMessage telegramMessage) {
     return deliveryService.end(
         telegramMessage.getChat().getId(),

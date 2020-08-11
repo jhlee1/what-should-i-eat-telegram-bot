@@ -1,12 +1,22 @@
 package lee.joohan.whattoeattelegrambot.handler.bot;
 
 
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_LADDER_GAME_USER_GROUP_MEMBER;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.CREATE_LADDER_GAME_USER_GROUP;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.DELETE_LADDER_GAME_USER_GROUP;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_LADDER_GAME_USER_GROUP;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.PLAY_LADDER_GAME;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.REMOVE_LADDER_GAME_USER_GROUP_MEMBER;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.SHOW_GAME_GROUP_MEMBER;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.SPLIT_LADDER_GAME_GROUP;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
+import lee.joohan.whattoeattelegrambot.config.BotCommandRouting;
 import lee.joohan.whattoeattelegrambot.domain.Ladder;
 import lee.joohan.whattoeattelegrambot.domain.LadderGameGroup;
 import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
@@ -24,6 +34,7 @@ public class LadderGameBotCommandHandler {
   private final LadderGameService ladderGameService;
   private final LadderGameGroupService ladderGameGroupService;
 
+  @BotCommandRouting(PLAY_LADDER_GAME)
   public Mono<String> play(TelegramMessage message) {
     if (!Pattern.matches("/\\S+(\\s*\\S+)+\\s*:\\s*(\\S+\\s*)+", message.getText())) {
       return Mono.just(ResponseMessage.START_LADDER_GAME_ARGS_ERROR_RESPONSE);
@@ -43,6 +54,7 @@ public class LadderGameBotCommandHandler {
         .map(Ladder::printGrid);
   }
 
+  @BotCommandRouting(CREATE_LADDER_GAME_USER_GROUP)
   public Mono<String> createGameGroup(TelegramMessage telegramMessage) {
     String message = telegramMessage.getText();
 
@@ -60,6 +72,7 @@ public class LadderGameBotCommandHandler {
         );
   }
 
+  @BotCommandRouting(DELETE_LADDER_GAME_USER_GROUP)
   public Mono<String> deleteGameGroup(TelegramMessage telegramMessage) {
     String message = telegramMessage.getText();
 
@@ -74,6 +87,7 @@ public class LadderGameBotCommandHandler {
         .onErrorReturn("사다리 게임 그룹 삭제 실패. 존재하지 않는 그룹명입니다.");
   }
 
+  @BotCommandRouting(LIST_LADDER_GAME_USER_GROUP)
   public Mono<String> listGameGroups() {
     return ladderGameGroupService.getAll()
         .map(LadderGameGroup::getName)
@@ -81,6 +95,7 @@ public class LadderGameBotCommandHandler {
         .collect(Collectors.joining("\n"));
   }
 
+  @BotCommandRouting(SHOW_GAME_GROUP_MEMBER)
   public Mono<String> listGameGroupMembers(TelegramMessage telegramMessage) {
     String message = telegramMessage.getText();
 
@@ -108,6 +123,7 @@ public class LadderGameBotCommandHandler {
   }
 
 
+  @BotCommandRouting(ADD_LADDER_GAME_USER_GROUP_MEMBER)
   public Mono<String> addGameGroupMember(TelegramMessage telegramMessage) {
     String message = telegramMessage.getText();
 
@@ -124,6 +140,7 @@ public class LadderGameBotCommandHandler {
         .onErrorReturn(AlreadyExistingGameGroupUserException.class, "그룹멤버 추가 실패. 해당 유저가 이미 그룹에 존재합니다.");
   }
 
+  @BotCommandRouting(REMOVE_LADDER_GAME_USER_GROUP_MEMBER)
   public Mono<String> removeGameGroupMember(TelegramMessage telegramMessage) {
     String message = telegramMessage.getText();
 
@@ -140,6 +157,7 @@ public class LadderGameBotCommandHandler {
         .onErrorReturn(NotFoundGameGroupException.class, "그룹 멤버 삭제 실패. 존재하지 않는 유저입니다.");
   }
 
+  @BotCommandRouting(SPLIT_LADDER_GAME_GROUP)
   public Mono<String> splitGameGroupMember(TelegramMessage telegramMessage) {
     String message = telegramMessage.getText();
 

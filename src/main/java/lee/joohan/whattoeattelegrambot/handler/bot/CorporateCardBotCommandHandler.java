@@ -1,5 +1,7 @@
 package lee.joohan.whattoeattelegrambot.handler.bot;
 
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_CORPORATE_CREDIT_CARD;
+import static lee.joohan.whattoeattelegrambot.common.BotCommand.PUT_BACK_CORPORATE_CREDIT_CARD;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.CORPORATE_CARD_ALREADY_IN_RETURNED_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE;
 import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.PUT_BACK_CORPORATE_CARD_ARGS_ERROR_RESPONSE;
@@ -10,6 +12,7 @@ import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.USE_CORPORA
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import lee.joohan.whattoeattelegrambot.config.BotCommandRouting;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyInUseException;
@@ -31,6 +34,7 @@ public class CorporateCardBotCommandHandler {
   private final CorporateCardService corporateCardService;
   private final UserService userService;
 
+  @BotCommandRouting(USE_CORPORATE_CARD)
   public Mono<String> useCard(TelegramMessage message) {
     if (!Pattern.matches("/\\S+ \\d+", message.getText())) {
       return Mono.just(USE_CORPORATE_CARD_ARGS_ERROR_RESPONSE);
@@ -49,6 +53,7 @@ public class CorporateCardBotCommandHandler {
         .onErrorReturn(CorporateCardAlreadyInUseException.class, CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE);
   }
 
+  @BotCommandRouting(PUT_BACK_CORPORATE_CREDIT_CARD)
   public Mono<String> putBackCard(TelegramMessage message) {
     if (Pattern.matches("/\\S+ \\d+", message.getText())) {
       int cardNum = Integer.parseInt(message.getText().split(" ")[1]);
@@ -83,6 +88,7 @@ public class CorporateCardBotCommandHandler {
         .onErrorReturn(CorporateCardAlreadyReturnedException.class, CORPORATE_CARD_ALREADY_IN_RETURNED_ERROR_RESPONSE);
   }
 
+  @BotCommandRouting(LIST_CORPORATE_CREDIT_CARD)
   public Mono<String> listCards() {
     return corporateCardService.listCardStatuses()
         .map(cardStatus ->
