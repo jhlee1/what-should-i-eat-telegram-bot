@@ -8,11 +8,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.function.Function;
-
 import java.util.stream.Collectors;
 import lee.joohan.whattoeattelegrambot.common.AccessTokenKey;
 import lee.joohan.whattoeattelegrambot.domain.User;
 import lee.joohan.whattoeattelegrambot.domain.UserRole;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,8 +21,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TokenProvider implements Serializable {
-  private static final String SIGNING_KEY = "ajnajrqhtxptmxmwnd"; //TODO: Resource로 옮기기
-  private static final long ACCESS_TOKEN_VALIDITY_SECONDS = 3600000;
+  @Value("${accessToken.secretKey}")
+  private String secretKey;
+  @Value("${accessToken.validForSeconds}")
+  private long tokenValidForSeconds;
 
   public String getEmailFromToken(String token) {
     return getClaimFromToken(token, Claims::getSubject);
@@ -39,7 +41,7 @@ public class TokenProvider implements Serializable {
 
   public Claims getAllClaimsFromToken(String token) {
     return Jwts.parser()
-        .setSigningKey(SIGNING_KEY)
+        .setSigningKey(secretKey)
         .parseClaimsJws(token)
         .getBody();
   }
@@ -57,10 +59,10 @@ public class TokenProvider implements Serializable {
             .map(UserRole::name)
             .collect(Collectors.toList()))
         .claim(USER_ID_KEY, user.getId().toHexString())
-        .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
+        .signWith(SignatureAlgorithm.HS256, secretKey)
         .setIssuer("anjajrqht")
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
+        .setExpiration(new Date(System.currentTimeMillis() + tokenValidForSeconds * 1000))
         .compact();
   }
 }

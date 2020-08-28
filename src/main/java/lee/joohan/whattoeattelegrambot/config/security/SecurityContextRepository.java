@@ -4,6 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMessage;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -31,7 +32,9 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
-        return Optional.ofNullable(exchange.getRequest().getHeaders())
+        return Optional.ofNullable(exchange)
+            .map(ServerWebExchange::getRequest)
+            .map(HttpMessage::getHeaders)
             .map(headers -> headers.getFirst(HttpHeaders.AUTHORIZATION))
             .filter(authHeader -> authHeader.startsWith(TOKEN_PREFIX))
             .map(authHeader -> authHeader.replace(TOKEN_PREFIX, ""))
