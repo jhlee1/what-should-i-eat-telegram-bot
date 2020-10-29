@@ -1,11 +1,5 @@
 package lee.joohan.whattoeattelegrambot.telegram;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import lee.joohan.whattoeattelegrambot.common.ResponseMessage;
 import lee.joohan.whattoeattelegrambot.config.BotCommandRouting;
 import lee.joohan.whattoeattelegrambot.handler.bot.TelegramMessageBotCommandHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +9,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import reactor.core.publisher.Mono;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Created by Joohan Lee on 2020/08/10
@@ -54,7 +54,7 @@ public class BotCommandDispatcher {
           final Method routedTo = routingMethods.get(command);
 
           if (routedTo == null) {
-            return Mono.just(ResponseMessage.NO_COMMAND_FOUND_ERROR_RESPONSE);
+            return Mono.empty();
           }
 
           final String className = routedTo.getDeclaringClass().getSimpleName();
