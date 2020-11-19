@@ -18,6 +18,7 @@ import lee.joohan.whattoeattelegrambot.domain.telegram.TelegramMessage;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyInUseException;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.CorporateCardAlreadyReturnedException;
 import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotBorrowedAnyCardException;
+import lee.joohan.whattoeattelegrambot.exception.corporate_card.NotFoundCorporateCardException;
 import lee.joohan.whattoeattelegrambot.service.CorporateCardService;
 import lee.joohan.whattoeattelegrambot.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class CorporateCardBotCommandHandler {
     )
         .flatMap(item ->corporateCardService.use(cardNum, item.getId()))
         .map(it -> USE_CORPORATE_CARD)
+        .onErrorReturn(NotFoundCorporateCardException.class, CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE)
         .onErrorReturn(CorporateCardAlreadyInUseException.class, CORPORATE_CARD_ALREADY_IN_USE_ERROR_RESPONSE);
   }
 

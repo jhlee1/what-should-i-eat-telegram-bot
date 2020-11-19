@@ -10,6 +10,8 @@ public class ErrorCode {
   public static final int NOT_BORROWED_ANY_CARD = 400004;
   public static final int NOT_VALID_EMAIL = 400005;
 
+  public static final int CORPORATE_CARD_CREATE_FAILURE = 400006;
+
 
 //  TelegramNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))
 //        .onErrorResume(EmailNotVerifiedException.class, error -> ServerResponse.badRequest().bodyValue(new ErrorResponse(error.getMessage())))

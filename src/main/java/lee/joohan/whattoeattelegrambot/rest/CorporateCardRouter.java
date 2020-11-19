@@ -22,9 +22,10 @@ public class CorporateCardRouter {
   private final CorporateCardRestHandler corporateCardRestHandler;
 
   @Bean
-  public RouterFunction<?> corporateCardRoutes() {
+  public RouterFunction<ServerResponse> corporateCardRoutes() {
     return RouterFunctions.route()
         .GET("/corporateCards", corporateCardRestHandler::getCorporateCardStatuses)
+        .POST("/corporateCards", corporateCardRestHandler::create)
         .PUT("/corporateCards/use", corporateCardRestHandler::use)
         .PUT("/corporateCards/putBack", request ->
             ServerResponse.ok()
