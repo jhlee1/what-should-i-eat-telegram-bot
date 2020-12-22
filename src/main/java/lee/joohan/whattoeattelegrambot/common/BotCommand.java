@@ -45,6 +45,10 @@ public class BotCommand {
   public static final String DELIVERY_ADD_MENU = "/배달추가";
   public static final String DELIVERY_END = "/배달마감";
 
+  public static final String ADD_DELIVERY_RESTAURANT = "/배달추가";
+  public static final String DELETE_DELIVERY_RESTAURANT = "/배달삭제";
+  public static final String LIST_DELIVERY_RESTAURANT = "/배달리스트";
+  public static final String RANDOM_DELIVERY_PICK = "/배달뭐먹";
 
   public static final String EMPTY = "";
 }

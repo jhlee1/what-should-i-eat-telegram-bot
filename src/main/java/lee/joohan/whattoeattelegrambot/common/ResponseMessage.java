@@ -26,8 +26,6 @@ public class ResponseMessage {
   public static final String DELETE_RESTAURANT_ARGS_ERROR_RESPONSE = "식당삭제 실패. 입력 형식을 확인하세요. (ex. /맛집삭제 이름)";
   public static final String CHANGE_RESTAURANT_NAME_ARGS_ERROR_RESPONSE = "식당 이름 변경 실패. 입력 형식을 확인하세요. (ex. /맛집이름변경 현재_이름 변경할_이름)";
   public static final String REGISTER_MENU_ARGS_ERROR_RESPONSE = "메뉴등록 실패. 입력 형식을 확인하세요. (ex. /메뉴추가 맛집이름 메뉴 (가격))";
-  public static final String EAT_OR_NOT_ARGS_ERROR_RESPONSE = "메뉴를 입력하세요. (ex. /먹을까 탕수육)";
-  public static final String RANDOM_PICK_ARGS_ERROR_RESPONSE = "뭐먹 잘못된 입력. (ex. /뭐먹 || /뭐먹 2)";
 
   public static final String REGISTER_CAFE_ARGS_ERROR_RESPONSE = "카페등록 실패. 입력 형식을 확인하세요. (ex. /카페추가 이름)";
 
@@ -53,6 +51,9 @@ public class ResponseMessage {
   public static final String DELIVERY_NOT_FOUND_ERROR_RESPONSE = "진행중인 배달아이템이 없습니다. 새로 시작하세요. (ex. /배달)";
   public static final String DELIVERY_ADD_MENU_ARGS_ERROR_RESPONSE = "잘못된 배달메뉴 추가. (ex. /배달추가 김밥 1)";
   public static final String ONLY_OWNER_CAN_END_DELIVERY_ERROR_RESPONSE = "배달을 시작한 사람만 마감가능.";
+
+  public static final String REGISTER_DELIVERY_RESTAURANT_ARGS_ERROR_RESPONSE = "배달 맛집 등록 실패. 입력 형식을 확인하세요. (ex. /배달맛집 이름)";
+  public static final String DELETE_DELIVERY_RESTAURANT_ARGS_ERROR_RESPONSE = "배달 맛집 삭제 실패. 입력 형식을 확인하세요. (ex. /배달맛집삭제 이름)";
 
   public static final String NO_COMMAND_FOUND_ERROR_RESPONSE = "명령어가 없습니다.";
 }

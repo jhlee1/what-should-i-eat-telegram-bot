@@ -3,7 +3,6 @@ package lee.joohan.whattoeattelegrambot.handler.bot;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.ADD_CAFE;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.LIST_CAFE;
 import static lee.joohan.whattoeattelegrambot.common.BotCommand.PICK_RANDOM_CAFE;
-import static lee.joohan.whattoeattelegrambot.common.ResponseMessage.RANDOM_PICK_ARGS_ERROR_RESPONSE;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -55,15 +54,15 @@ public class CafeBotCommandHandler {
 
   @BotCommandRouting(PICK_RANDOM_CAFE)
   public Mono<String> random(TelegramMessage telegramMessage) {
-    String[] input = telegramMessage.getText().split(" ");
+    int num = 1;
 
-    int num = input.length > 1 ? Integer.parseInt(input[1]) : 1;
+    if (Pattern.matches("/\\S+ \\d+", telegramMessage.getText())) {
+      num = Integer.parseInt(telegramMessage.getText().split(" ")[1]);
+    }
 
     return cafeService.randomSample(num)
         .map(Cafe::getName)
         .sort()
-        .collect(Collectors.joining("\n"))
-        .onErrorReturn(IllegalArgumentException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE)
-        .onErrorReturn(NumberFormatException.class, RANDOM_PICK_ARGS_ERROR_RESPONSE);
+        .collect(Collectors.joining("\n"));
   }
 }
